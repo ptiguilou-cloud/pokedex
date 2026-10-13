@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pokédex de la chaîne</title>
+<meta name="description" content="Retrouve tous les Pokémon capturés pendant le stream.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23fff' stroke='%23222' stroke-width='8'/><path d='M4 50a46 46 0 0 1 92 0z' fill='%23e3350d' stroke='%23222' stroke-width='8'/><circle cx='50' cy='50' r='13' fill='%23fff' stroke='%23222' stroke-width='8'/></svg>">
+<!--
+  Page publiée sur GitHub Pages par capture_pokemon.py, avec le fichier donnees.json.
+  Lien direct vers un Dex : .../#pseudo
+-->
+<style>
+  :root {
+    --fond: #0b1430;
+    --fond2: #111d42;
+    --carte: #16234d;
+    --carte2: rgba(255, 255, 255, 0.06);
+    --bord: rgba(255, 255, 255, 0.1);
+    --jaune: #ffcb05;
+    --rouge: #e3350d;
+    --texte: #f4f1ff;
+    --muted: #9fb8e0;
+    --vert: #3ddc84;
+    --mauve: #a64dff;
+    --or: #e0a72e;
+    --rayon: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; min-height: 100vh; color: var(--texte); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(ellipse at top, #1b2c63 0%, var(--fond) 55%) fixed, var(--fond); }
+  a { color: inherit; }
+  button, input, select { font: inherit; color: inherit; }
+  .conteneur { max-width: 1080px; margin: 0 auto; padding: 0 16px 48px; }
+  .cache { display: none !important; }
+
+  /* ---------- En-tête ---------- */
+  header { border-top: 6px solid var(--rouge); background: rgba(11, 20, 48, .85); position: sticky; top: 0; z-index: 5;
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--bord); }
+  .entete { max-width: 1080px; margin: 0 auto; padding: 12px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+  .pokeball { width: 34px; height: 34px; flex: none; border-radius: 50%; border: 3px solid #111; position: relative;
+    background: linear-gradient(#e3350d 0 46%, #111 46% 54%, #fff 54%); }
+  .pokeball::after { content: ''; position: absolute; inset: 0; margin: auto; width: 10px; height: 10px; border-radius: 50%;
+    background: #fff; border: 3px solid #111; }
+  .marque h1 { margin: 0; font-size: 20px; line-height: 1.1; }
+  .marque h1 span { color: var(--jaune); }
+  .marque small { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
+  form.recherche { display: flex; gap: 8px; flex: 1 1 280px; max-width: 420px; }
+  .recherche input { flex: 1; min-width: 0; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--bord);
+    background: var(--fond2); outline: none; }
+  .recherche input:focus { border-color: var(--jaune); }
+  .bouton { padding: 10px 16px; border-radius: 999px; border: 0; background: var(--jaune); color: #1a1a1a; font-weight: 700;
+    cursor: pointer; white-space: nowrap; }
+  .bouton.secondaire { background: var(--carte2); color: var(--texte); border: 1px solid var(--bord); font-weight: 600; }
+  .bouton:focus-visible, .puce-filtre:focus-visible, .dresseur:focus-visible { outline: 2px solid var(--jaune); outline-offset: 2px; }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 28px; }
+  h2 { font-size: 22px; margin: 0 0 12px; }
+  h2 small { color: var(--muted); font-size: 15px; font-weight: 400; margin-left: 6px; }
+  .bloc { background: var(--carte); border: 1px solid var(--bord); border-radius: var(--rayon); padding: 16px; }
+  .vide { color: var(--muted); padding: 10px 0; }
+  .etat { text-align: center; color: var(--muted); padding: 60px 0; }
+
+  /* Champion */
+  .champion { display: flex; align-items: center; gap: 16px; background: linear-gradient(120deg, rgba(255, 203, 5, .18), rgba(227, 53, 13, .12));
+    border: 1px solid rgba(255, 203, 5, .35); border-radius: var(--rayon); padding: 16px 18px; }
+  .champion .couronne { font-size: 40px; }
+  .champion b { font-size: 22px; color: var(--jaune); }
+  .champion p { margin: 2px 0 0; color: var(--muted); }
+
+  /* Classement */
+  .classement { display: grid; gap: 6px; }
+  .ligne { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 9px 12px;
+    border-radius: 10px; background: var(--carte2); text-decoration: none; }
+  .ligne:hover { background: rgba(255, 255, 255, .1); }
+  .ligne .pos { font-weight: 800; font-size: 18px; text-align: center; color: var(--muted); }
+  .ligne:first-child .pos { color: var(--jaune); }
+  .ligne small { display: block; color: var(--muted); font-size: 13px; }
+  .ligne .score { text-align: right; font-weight: 700; }
+
+  /* Dernières captures */
+  .defile { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+  .mini { flex: none; width: 116px; text-align: center; background: var(--carte); border: 1px solid var(--bord);
+    border-radius: 12px; padding: 6px 6px 10px; scroll-snap-align: start; text-decoration: none; }
+  .mini img { width: 80px; height: 80px; image-rendering: pixelated; }
+  .mini b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini small { color: var(--muted); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Liste des dresseurs */
+  .dresseurs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dresseur { padding: 7px 14px; border-radius: 999px; background: var(--carte2); border: 1px solid var(--bord);
+    text-decoration: none; font-size: 15px; }
+  .dresseur:hover { border-color: var(--jaune); }
+  .dresseur span { color: var(--muted); margin-left: 4px; }
+
+  /* ---------- Vue Dex ---------- */
+  .retour { display: inline-block; margin-top: 20px; color: var(--muted); text-decoration: none; }
+  .retour:hover { color: var(--texte); }
+  .titre-dex { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; justify-content: space-between; margin-top: 10px; }
+  .titre-dex h2 { font-size: clamp(30px, 6vw, 44px); margin: 0; color: var(--jaune); word-break: break-word; }
+  .titre-dex h2 span { color: var(--texte); }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .stats div { background: var(--carte2); border: 1px solid var(--bord); padding: 6px 12px; border-radius: 999px; font-size: 15px; }
+  .stats .or { border-color: rgba(255, 203, 5, .5); color: var(--jaune); }
+  .progression { margin: 6px 0 4px; }
+  .progression .barre { height: 10px; background: var(--carte2); border-radius: 5px; overflow: hidden; }
+  .progression .barre div { height: 100%; background: linear-gradient(90deg, var(--rouge), var(--jaune)); border-radius: 5px; }
+  .progression small { color: var(--muted); font-size: 14px; }
+  .outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 12px; }
+  .puce-filtre { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--bord); background: var(--carte2); cursor: pointer; font-size: 14px; }
+  .puce-filtre[aria-pressed="true"] { background: var(--jaune); color: #1a1a1a; border-color: var(--jaune); font-weight: 700; }
+  .outils select { margin-left: auto; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--bord); background: var(--fond2); }
+  .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+  .carte { position: relative; background: var(--carte); border: 1px solid var(--bord); border-radius: var(--rayon);
+    padding: 8px 8px 12px; text-align: center; }
+  .carte img { width: 96px; height: 96px; image-rendering: pixelated; }
+  .carte .num { position: absolute; top: 8px; left: 10px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .carte .niv { position: absolute; top: 8px; right: 10px; font-size: 12px; font-weight: 800; color: var(--muted); }
+  .carte b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .carte .tag { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+    padding: 1px 7px; border-radius: 5px; }
+  .carte.shiny { border-color: var(--jaune); box-shadow: 0 0 18px rgba(255, 203, 5, .25); }
+  .carte.shiny img { filter: drop-shadow(0 0 8px rgba(255, 230, 109, .8)); }
+  .carte.obscur { border-color: var(--mauve); background: linear-gradient(180deg, rgba(91, 42, 134, .45), var(--carte)); }
+  .carte.obscur img { filter: drop-shadow(0 0 8px rgba(166, 77, 255, .8)); }
+  .carte.baron { border-color: var(--or); background: linear-gradient(180deg, rgba(184, 134, 11, .3), var(--carte)); }
+  .tag.shiny { background: var(--jaune); color: #1a1a1a; }
+  .tag.obscur { background: #5b2a86; color: #e6d0ff; }
+  .tag.baron { background: #b8860b; color: #fff4c2; }
+  .genre { font-weight: 700; margin-left: 3px; }
+  .genre.m { color: #6fb6ff; } .genre.f { color: #ff8fb8; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--vert); color: #0b2a17;
+    font-weight: 700; padding: 10px 18px; border-radius: 999px; transition: opacity .3s; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 40px; }
+
+  @media (max-width: 560px) {
+    .marque h1 { font-size: 17px; }
+    .grille { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+    .carte img { width: 76px; height: 76px; }
+    .outils select { margin-left: 0; width: 100%; }
+    form.recherche { flex: 1 1 100%; max-width: none; min-width: 0; }
+    .recherche .bouton { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="entete">
+    <a class="marque" href="#">
+      <span class="pokeball" aria-hidden="true"></span>
+      <h1>Pokédex <span id="nomChaine">du stream</span><small id="maj">Chargement…</small></h1>
+    </a>
+    <form class="recherche" id="recherche" role="search">
+      <input id="champ" list="pseudos" placeholder="Ton pseudo Twitch…" autocomplete="off" aria-label="Pseudo du dresseur">
+      <datalist id="pseudos"></datalist>
+      <button class="bouton" type="submit">Voir le Dex</button>
+    </form>
+  </div>
+</header>
+
+<main class="conteneur">
+  <div id="etat" class="etat">Chargement du Pokédex…</div>
+
+  <!-- Accueil -->
+  <div id="accueil" class="cache">
+    <section id="blocChampion"></section>
+    <section>
+      <h2>🏆 Classement de l'Arène</h2>
+      <div class="bloc"><div id="classement" class="classement"></div></div>
+    </section>
+    <section>
+      <h2>🎉 Dernières captures</h2>
+      <div id="dernieres" class="defile"></div>
+    </section>
+    <section>
+      <h2>📖 Tous les dresseurs <small id="nbDresseurs"></small></h2>
+      <div id="dresseurs" class="dresseurs"></div>
+    </section>
+  </div>
+
+  <!-- Dex d'un dresseur -->
+  <div id="vueDex" class="cache">
+    <a class="retour" href="#">← Tous les dresseurs</a>
+    <div class="titre-dex">
+      <h2 id="titreDex"></h2>
+      <button class="bouton secondaire" id="partager" type="button">🔗 Copier le lien de ce Dex</button>
+    </div>
+    <div class="stats" id="statsDex"></div>
+    <div class="progression" id="progression"></div>
+    <div class="outils" id="outils">
+      <button class="puce-filtre" data-filtre="tous" aria-pressed="true">Tous</button>
+      <button class="puce-filtre" data-filtre="shiny" aria-pressed="false">✨ Shiny</button>
+      <button class="puce-filtre" data-filtre="obscur" aria-pressed="false">🌑 Obscur</button>
+      <button class="puce-filtre" data-filtre="baron" aria-pressed="false">👑 Baron</button>
+      <select id="tri" aria-label="Trier">
+        <option value="niveau">Trier par niveau</option>
+        <option value="numero">Trier par n° du Pokédex</option>
+        <option value="nom">Trier par nom</option>
+        <option value="rarete">Trier par rareté</option>
+      </select>
+    </div>
+    <div id="grille" class="grille"></div>
+  </div>
+
+  <footer id="pied"></footer>
+</main>
+<div id="toast" class="toast cache" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+const sprite = (n, type) => `${BASE}${type === 'shiny' ? 'shiny/' : ''}${n}.png`;
+// si l'image shiny n'existe pas, on prend l'image normale
+const secours = n => `onerror="this.onerror=null;this.src='${BASE}${n}.png'"`;
+const RARETE = { shiny: 0, baron: 1, obscur: 2, normal: 3 };
+const MARQUE = { shiny: '✨', obscur: '🌑', baron: '👑' };
+const cleNom = s => String(s).toLowerCase();
+
+let donnees = null;
+let filtre = 'tous';
+
+function quand(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const min = Math.round((Date.now() - d) / 60000);
+  if (min < 1) return 'à l\'instant';
+  if (min < 60) return `il y a ${min} min`;
+  if (min < 60 * 24) return `il y a ${Math.round(min / 60)} h`;
+  return 'le ' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+}
+
+function carteMini(c) {
+  return `<a class="mini" href="#${encodeURIComponent(c.dresseur)}">` +
+    `<img src="${sprite(c.numero, c.type)}" ${secours(c.numero)} alt="" loading="lazy">` +
+    `<b>${esc(c.nom)} ${MARQUE[c.type] || ''}</b><small>${esc(c.dresseur)}</small></a>`;
+}
+
+// ---------- Accueil ----------
+function afficherAccueil() {
+  const d = donnees;
+  $('blocChampion').innerHTML = d.champion
+    ? `<a class="champion" href="#${encodeURIComponent(d.champion)}" style="text-decoration:none">
+         <span class="couronne">👑</span>
+         <div><b>${esc(d.champion)}</b><p>Champion de l'Arène · ${d.defenses} défense${d.defenses > 1 ? 's' : ''} réussie${d.defenses > 1 ? 's' : ''}</p></div></a>`
+    : '';
+  $('blocChampion').classList.toggle('cache', !d.champion);
+
+  const top = d.dresseurs.filter(x => x.victoires + x.defaites > 0)
+    .sort((a, b) => b.elo - a.elo || b.victoires - a.victoires).slice(0, 10);
+  $('classement').innerHTML = top.length ? top.map((x, i) =>
+    `<a class="ligne" href="#${encodeURIComponent(x.nom)}"><span class="pos">${i + 1}</span>` +
+    `<span>${x.champion ? '👑 ' : ''}<b>${esc(x.nom)}</b><small>${x.icone} ${esc(x.rang)}</small></span>` +
+    `<span class="score">${x.elo} pts<small>${x.victoires}V / ${x.defaites}D</small></span></a>`).join('')
+    : '<div class="vide">Aucun combat pour l\'instant. Défie quelqu\'un en live avec !combat @pseudo</div>';
+
+  $('dernieres').innerHTML = (d.dernieres_captures || []).filter(c => c.numero).map(carteMini).join('')
+    || '<div class="vide">Aucune capture pour l\'instant.</div>';
+
+  const tous = [...d.dresseurs].sort((a, b) => b.pokemons.length - a.pokemons.length || a.nom.localeCompare(b.nom));
+  $('nbDresseurs').textContent = `· ${tous.length}`;
+  $('dresseurs').innerHTML = tous.map(x =>
+    `<a class="dresseur" href="#${encodeURIComponent(x.nom)}">${x.champion ? '👑 ' : ''}${esc(x.nom)}<span>${x.pokemons.length}</span></a>`).join('');
+
+  $('accueil').classList.remove('cache');
+  $('vueDex').classList.add('cache');
+  document.title = `Pokédex de ${d.chaine || 'la chaîne'}`;
+}
+
+// ---------- Dex d'un dresseur ----------
+function afficherDex(nom) {
+  const x = donnees.dresseurs.find(d => cleNom(d.nom) === cleNom(nom));
+  if (!x) {
+    $('accueil').classList.add('cache');
+    $('vueDex').classList.remove('cache');
+    $('titreDex').innerHTML = `${esc(nom)}<span>Dex</span>`;
+    $('statsDex').innerHTML = '';
+    $('progression').innerHTML = '';
+    $('outils').classList.add('cache');
+    $('partager').classList.add('cache');
+    $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">Aucun dresseur à ce nom pour l'instant. ` +
+      `Capture ton premier Pokémon en live (Pokéball avec les points de chaîne, ou un Pokémon sauvage) !</div>`;
+    return;
+  }
+  const especes = new Set(x.pokemons.map(p => p.numero)).size;
+  const variantes = x.pokemons.filter(p => p.type !== 'normal').length;
+  $('titreDex').innerHTML = `${esc(x.nom)}<span>Dex</span>`;
+  $('statsDex').innerHTML =
+    `<div>💰 ${x.pieces} poképièces</div><div>${x.icone} ${esc(x.rang)}</div>` +
+    `<div>⚔️ ${x.victoires}V / ${x.defaites}D</div>` +
+    (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
+    (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
+    (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '');
+  const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 1025));
+  $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
+    `<small>${x.pokemons.length} Pokémon · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 1025}</small>`;
+  $('outils').classList.toggle('cache', !x.pokemons.length);
+  $('partager').classList.remove('cache');
+  $('partager').onclick = () => copier(location.href, 'Lien copié !');
+  dessinerGrille(x);
+  $('accueil').classList.add('cache');
+  $('vueDex').classList.remove('cache');
+  document.title = `${x.nom}Dex · Pokédex de ${donnees.chaine || 'la chaîne'}`;
+}
+
+function dessinerGrille(x) {
+  const tri = $('tri').value;
+  const liste = x.pokemons.filter(p => filtre === 'tous' || p.type === filtre).sort((a, b) =>
+    tri === 'numero' ? a.numero - b.numero :
+    tri === 'nom' ? a.nom.localeCompare(b.nom) :
+    tri === 'rarete' ? (RARETE[a.type] ?? 3) - (RARETE[b.type] ?? 3) || b.niveau - a.niveau :
+    b.niveau - a.niveau || (RARETE[a.type] ?? 3) - (RARETE[b.type] ?? 3) || a.numero - b.numero);
+  $('grille').innerHTML = liste.length ? liste.map(p => {
+    const g = p.genre === '♂' ? '<span class="genre m">♂</span>' : p.genre === '♀' ? '<span class="genre f">♀</span>' : '';
+    return `<div class="carte ${p.type}"><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
+      `<span class="niv">N.${p.niveau}</span>` +
+      `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
+      `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
+  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Pokémon de ce type.' : 'Aucun Pokémon pour l\'instant.'}</div>`;
+}
+
+document.querySelectorAll('.puce-filtre').forEach(b => b.onclick = () => {
+  filtre = b.dataset.filtre;
+  document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o === b));
+  router();
+});
+$('tri').onchange = () => router();
+
+function copier(texte, message) {
+  const fini = () => { const t = $('toast'); t.textContent = message; t.classList.remove('cache'); setTimeout(() => t.classList.add('cache'), 1800); };
+  if (navigator.clipboard) navigator.clipboard.writeText(texte).then(fini, () => prompt('Copie ce lien :', texte));
+  else prompt('Copie ce lien :', texte);
+}
+
+// ---------- Navigation : #pseudo ----------
+function router() {
+  if (!donnees) return;
+  const nom = decodeURIComponent(location.hash.slice(1)).trim().replace(/^@/, '');
+  if (nom) afficherDex(nom); else afficherAccueil();
+}
+window.addEventListener('hashchange', () => { filtre = 'tous'; document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
+$('recherche').onsubmit = e => {
+  e.preventDefault();
+  const v = $('champ').value.trim().replace(/^@/, '');
+  if (v) location.hash = encodeURIComponent(v);
+  $('champ').blur();
+};
+
+// ---------- Chargement ----------
+async function charger() {
+  try {
+    const rep = await fetch('donnees.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!rep.ok) throw new Error(rep.status);
+    donnees = await rep.json();
+  } catch (e) {
+    if (!donnees) $('etat').textContent = 'Le Pokédex n\'est pas encore disponible. Reviens dans quelques minutes !';
+    return;
+  }
+  $('etat').classList.add('cache');
+  $('nomChaine').textContent = donnees.chaine ? 'de ' + donnees.chaine : 'du stream';
+  $('maj').textContent = 'Mis à jour ' + quand(donnees.maj);
+  $('pseudos').innerHTML = donnees.dresseurs.map(x => `<option value="${esc(x.nom)}">`).join('');
+  $('pied').innerHTML = donnees.chaine
+    ? `Les captures se font en live sur <a href="https://twitch.tv/${encodeURIComponent(donnees.chaine)}" target="_blank" rel="noopener">twitch.tv/${esc(donnees.chaine)}</a>`
+    : '';
+  router();
+}
+charger();
+setInterval(charger, 5 * 60 * 1000);   // rafraîchit toutes les 5 min si la page reste ouverte
+</script>
+</body>
+</html>
