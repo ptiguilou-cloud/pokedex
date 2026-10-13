@@ -226,13 +226,13 @@ let donnees = null;
 let filtre = 'tous';
 
 function quand(iso) {
+  // Heure du dernier changement (capture, combat, don...) et non de la dernière visite du script
   const d = new Date(iso);
   if (isNaN(d)) return '';
-  const min = Math.round((Date.now() - d) / 60000);
-  if (min < 1) return 'à l\'instant';
-  if (min < 60) return `il y a ${min} min`;
-  if (min < 60 * 24) return `il y a ${Math.round(min / 60)} h`;
-  return 'le ' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const jour = new Date().toDateString() === d.toDateString() ? 'aujourd\'hui'
+    : 'le ' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  return `${jour} à ${heure}`;
 }
 
 function carteMini(c) {
@@ -363,7 +363,7 @@ async function charger() {
   }
   $('etat').classList.add('cache');
   $('nomChaine').textContent = donnees.chaine ? 'de ' + donnees.chaine : 'du stream';
-  $('maj').textContent = 'Mis à jour ' + quand(donnees.maj);
+  $('maj').textContent = 'Dernière nouveauté : ' + quand(donnees.maj);
   $('pseudos').innerHTML = donnees.dresseurs.map(x => `<option value="${esc(x.nom)}">`).join('');
   $('pied').innerHTML = donnees.chaine
     ? `Les captures se font en live sur <a href="https://twitch.tv/${encodeURIComponent(donnees.chaine)}" target="_blank" rel="noopener">twitch.tv/${esc(donnees.chaine)}</a>`
