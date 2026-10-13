@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pokédex de la chaîne</title>
-<meta name="description" content="Retrouve tous les Pokémon capturés pendant le stream.">
+<title>Fifrelins — le Dex de la chaîne</title>
+<meta name="description" content="Le bestiaire des 99 Fifrelins et tous les Dex des dresseurs du stream.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23fff' stroke='%23222' stroke-width='8'/><path d='M4 50a46 46 0 0 1 92 0z' fill='%23e3350d' stroke='%23222' stroke-width='8'/><circle cx='50' cy='50' r='13' fill='%23fff' stroke='%23222' stroke-width='8'/></svg>">
 <!--
   Page publiée sur GitHub Pages par capture_pokemon.py, avec le fichier donnees.json.
@@ -33,10 +33,10 @@
     box-shadow: 0 1px 6px rgba(0, 0, 0, .4); }
   .entete { max-width: 1080px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
-  .pokeball { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 3px solid #0e0e10; position: relative;
-    background: linear-gradient(var(--violet) 0 46%, #0e0e10 46% 54%, #fff 54%); box-shadow: 0 0 0 1px var(--bord); }
-  .pokeball::after { content: ''; position: absolute; inset: 0; margin: auto; width: 9px; height: 9px; border-radius: 50%;
-    background: #fff; border: 3px solid #0e0e10; }
+  .pokeball { width: 30px; height: 30px; flex: none; border-radius: 50%; position: relative;
+    background: radial-gradient(circle at 35% 30%, #fff 0 8%, var(--violet-clair) 20%, var(--violet) 55%, #3a1680 100%);
+    box-shadow: 0 0 12px rgba(145, 70, 255, .6), 0 0 0 1px var(--bord); }
+  .pokeball::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); }
   .marque h1 { margin: 0; font-size: 18px; line-height: 1.15; font-weight: 800; }
   .marque h1 span { color: var(--violet-clair); }
   .marque small { display: block; color: var(--gris); font-size: 12px; font-weight: 400; }
@@ -90,7 +90,7 @@
   .mini { flex: none; width: 108px; text-align: center; background: var(--fond2); border: 1px solid var(--bord);
     border-radius: 6px; padding: 6px 6px 8px; scroll-snap-align: start; text-decoration: none; transition: background .15s; }
   .mini:hover { background: var(--fond3); }
-  .mini img { width: 72px; height: 72px; image-rendering: pixelated; }
+  .mini img { width: 72px; height: 72px; image-rendering: auto; }
   .mini b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mini small { color: var(--gris); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -125,7 +125,7 @@
   .carte-poke { position: relative; background: var(--fond); border: 1px solid var(--bord); border-radius: 8px;
     padding: 8px 8px 10px; text-align: center; transition: transform .15s, border-color .15s; }
   .carte-poke:hover { transform: translateY(-2px); border-color: var(--gris); }
-  .carte-poke img { width: 92px; height: 92px; image-rendering: pixelated; }
+  .carte-poke img { width: 92px; height: 92px; image-rendering: auto; }
   .carte-poke .num { position: absolute; top: 7px; left: 9px; font-size: 11px; color: var(--gris); font-variant-numeric: tabular-nums; }
   .carte-poke .niv { position: absolute; top: 7px; right: 9px; font-size: 11px; font-weight: 800; color: var(--gris); }
   .carte-poke b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -151,6 +151,38 @@
     background: linear-gradient(135deg, var(--b1) 0 45%, var(--b2) 45% 100%);
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .5)); }
 
+  /* ---------- Lore et bestiaire ---------- */
+  .lore { padding: 16px 18px; border-radius: var(--rayon); border: 1px solid var(--bord); font-size: 14px; line-height: 1.55;
+    color: #d8d6e4; background: linear-gradient(120deg, rgba(145, 70, 255, .18), rgba(14, 14, 16, 0) 60%), var(--fond); }
+  .lore b { color: var(--violet-clair); }
+  .bestiaire { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; margin-top: 10px; }
+  .bete { position: relative; padding: 4px 4px 6px; border-radius: 6px; background: var(--fond2); border: 1px solid var(--bord);
+    text-align: center; cursor: pointer; font: inherit; color: inherit; transition: transform .15s, border-color .15s; }
+  .bete:hover { transform: translateY(-2px); border-color: var(--gris); }
+  .bete img { width: 64px; height: 64px; image-rendering: auto; }
+  .bete .n { position: absolute; top: 3px; left: 5px; font-size: 10px; color: var(--gris); }
+  .bete b { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bete.inconnu img { filter: brightness(0) opacity(.55); }
+  .bete.inconnu b { color: var(--gris); }
+  .bete.souverain { border-color: #e9a93a; background: linear-gradient(180deg, rgba(233, 169, 58, .18), var(--fond2)); }
+  .domaines { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  .domaine { padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.5); }
+  dialog#fiche { width: min(560px, calc(100vw - 32px)); border: 1px solid var(--bord); border-radius: var(--rayon); padding: 0;
+    background: var(--fond); color: var(--texte); }
+  dialog#fiche::backdrop { background: rgba(0, 0, 0, .7); }
+  .fiche-corps { display: grid; grid-template-columns: 150px 1fr; gap: 14px; padding: 14px; }
+  .fiche-corps img.grand { width: 150px; height: 150px; image-rendering: auto; background: var(--fond2); border-radius: 8px; border: 1px solid var(--bord); }
+  .fiche-corps h3 { margin: 0 0 4px; font-size: 24px; }
+  .fiche-corps p { font-size: 14px; line-height: 1.5; margin: 8px 0; }
+  .fiche-corps .infos { font-size: 12px; color: var(--gris); }
+  .fiche-lignee { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 0 14px 14px; font-size: 12px; color: var(--gris); }
+  .fiche-lignee button { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; text-align: center; }
+  .fiche-lignee img { width: 56px; height: 56px; image-rendering: auto; }
+  .fiche-lignee .actuel { color: var(--texte); font-weight: 700; }
+  .fermer { margin-left: auto; background: none; border: 0; color: var(--gris); font-size: 20px; cursor: pointer; line-height: 1; }
+  .fiche-corps .domaines { justify-content: flex-start; }
+  @media (max-width: 560px) { .fiche-corps { grid-template-columns: 1fr; justify-items: center; text-align: center; } .fiche-corps .domaines { justify-content: center; } }
+
   footer { text-align: center; color: var(--gris); font-size: 13px; margin-top: 40px; }
   footer a { color: var(--violet-clair); }
 
@@ -161,6 +193,14 @@
     .carte-poke img { width: 72px; height: 72px; }
     .outils select { margin-left: 0; width: 100%; }
   }
+  .bete .cadenas { position: absolute; top: 2px; right: 4px; font-size: 11px; }
+  .bete.vu img { opacity: .75; }
+  .barre.double { position: relative; }
+  .barre.double div { position: absolute; left: 0; top: 0; bottom: 0; }
+  .barre.double .vus { opacity: .35; }
+  .fiche-corps .espece { font-size: 12px; font-weight: 700; color: var(--gris); text-transform: uppercase; letter-spacing: .6px; margin: -2px 0 6px; }
+  .fiche-corps p.entree { font-style: italic; }
+  .fiche-corps p.verrou { color: var(--gris); }
 </style>
 </head>
 <body>
@@ -169,7 +209,7 @@
   <div class="entete">
     <a class="marque" href="#">
       <span class="pokeball" aria-hidden="true"></span>
-      <h1>Pokédex <span id="nomChaine">du stream</span><small id="maj">Chargement…</small></h1>
+      <h1>Fifrelins <span id="nomChaine">du stream</span><small id="maj">Chargement…</small></h1>
     </a>
     <form class="recherche" id="recherche" role="search">
       <input id="champ" list="pseudos" placeholder="Ton pseudo Twitch…" autocomplete="off" aria-label="Pseudo du dresseur">
@@ -180,18 +220,26 @@
 </header>
 
 <main class="conteneur">
-  <div id="etat" class="etat">Chargement du Pokédex…</div>
+  <div id="etat" class="etat">Chargement du Dex…</div>
 
   <!-- Accueil -->
   <div id="accueil" class="cache">
+    <section class="lore" id="lore"></section>
     <section id="blocChampion"></section>
     <section class="carte">
-      <div class="tete"><span class="pastille">🏆 Classement</span><b>Arène Pokémon</b></div>
+      <div class="tete"><span class="pastille">🏆 Classement</span><b>Arène des Fifrelins</b></div>
       <div class="corps"><div id="classement" class="classement"></div></div>
     </section>
     <section class="carte">
       <div class="tete"><span class="pastille">🎉 Captures</span><b>Les dernières prises du live</b></div>
       <div class="corps"><div id="dernieres" class="defile"></div></div>
+    </section>
+    <section class="carte">
+      <div class="tete"><span class="pastille">📜 Bestiaire</span><b>Les 99 Fifrelins</b><span class="tete-droite" id="nbDecouverts"></span></div>
+      <div class="corps">
+        <div class="progression" id="progBestiaire"></div>
+        <div id="bestiaire" class="bestiaire"></div>
+      </div>
     </section>
     <section class="carte">
       <div class="tete"><span class="pastille">📖 Dresseurs</span><b>Tous les Dex</b><span class="tete-droite" id="nbDresseurs"></span></div>
@@ -215,7 +263,7 @@
       <button class="puce-filtre" data-filtre="baron" aria-pressed="false">👑 Baron</button>
       <select id="tri" aria-label="Trier">
         <option value="niveau">Trier par niveau</option>
-        <option value="numero">Trier par n° du Pokédex</option>
+        <option value="numero">Trier par n° du Bestiaire</option>
         <option value="nom">Trier par nom</option>
         <option value="rarete">Trier par rareté</option>
       </select>
@@ -226,25 +274,29 @@
   <footer id="pied"></footer>
 </main>
 <div id="toast" class="toast cache" role="status"></div>
+<dialog id="fiche"></dialog>
 
 <script>
+const deLegende = s => /^les /i.test(s) ? 'des ' + s.slice(4) : /^le /i.test(s) ? 'du ' + s.slice(3)
+  : /^[aeiouyéèêàâîôûh]/i.test(s) ? "d'" + s : 'de ' + s;
+
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-const sprite = (n, type) => `${BASE}${type === 'shiny' ? 'shiny/' : ''}${n}.png`;
+const pad = n => String(n).padStart(3, '0');
+const sprite = (n, type) => `creatures/${type === 'shiny' ? 'shiny/' : ''}${pad(n)}.png`;
 // si l'image shiny n'existe pas, on prend l'image normale
-const secours = n => `onerror="this.onerror=null;this.src='${BASE}${n}.png'"`;
+const secours = n => `onerror="this.onerror=null;this.src='creatures/${pad(n)}.png'"`;
 const RARETE = { shiny: 0, baron: 1, obscur: 2, normal: 3 };
 const MARQUE = { shiny: '✨', obscur: '🌑', baron: '👑' };
 const cleNom = s => String(s).toLowerCase();
 
 // Badges d'arène : petite gemme colorée + nom (rendu identique sur tous les appareils)
 const COULEURS_BADGES = {
-  'Badge Roche': ['#d6d6d6', '#8a8a8a'], 'Badge Cascade': ['#bfe2ff', '#3a8ee8'],
-  'Badge Foudre': ['#ffd6a0', '#ff7a00'], 'Badge Prisme': ['#b9f5c9', '#c25bff'],
-  'Badge Âme': ['#ffd3e6', '#ff4f9a'], 'Badge Marais': ['#fff3a0', '#c99a00'],
-  'Badge Volcan': ['#ffc2a8', '#e3350d'], 'Badge Terre': ['#c9f5d6', '#2f9e5a'],
-  'Maître Pokémon': ['#ffe066', '#9146ff'],
+  "Badge de Craie": ['#f4f2ea', '#b8b4a8'], 'Badge de Brique': ['#f0a080', '#a84a30'],
+  'Badge de Schiste': ['#b8b4c0', '#4a4652'], "Badge du Pavé": ['#d8d0c0', '#7a6e60'],
+  "Badge du Carillon": ['#ffe070', '#c89a10'], "Badge du Beffroi": ['#ffb8a0', '#d0503a'],
+  "Badge d'Opale": ['#f4e4ff', '#7ac8e8'], 'Badge du Lion': ['#ffe066', '#2a2a32'],
+  'Géant du Nord': ['#ffe066', '#9146ff'],
 };
 function badge(nom) {
   const [b1, b2] = COULEURS_BADGES[nom] || ['#ddd', '#888'];
@@ -270,6 +322,68 @@ function carteMini(c) {
     `<b>${esc(c.nom)} ${MARQUE[c.type] || ''}</b><small>${esc(c.dresseur)}</small></a>`;
 }
 
+// ---------- Bestiaire ----------
+const domainesHtml = types => `<div class="domaines">${types.map(t =>
+  `<span class="domaine" style="background:${(donnees.univers.domaines || {})[t] || '#666'}">${esc(t)}</span>`).join('')}</div>`;
+
+function afficherBestiaire(d) {
+  const u = d.univers;
+  if (!u) return;
+  $('lore').innerHTML = `<b>${esc(u.nom)}</b> — ${esc(u.lore)}`;
+  const etat = c => c.etat || (c.decouvert ? 'decouvert' : 'inconnu');
+  const nbDec = u.creatures.filter(c => etat(c) === 'decouvert').length;
+  const nbVus = u.creatures.filter(c => etat(c) !== 'inconnu').length;
+  const total = u.creatures.length;
+  $('nbDecouverts').textContent = `${nbDec} découverts · ${nbVus} aperçus / ${total}`;
+  $('progBestiaire').innerHTML = `<div class="barre double"><div class="vus" style="width:${100 * nbVus / total}%"></div>` +
+    `<div style="width:${100 * nbDec / total}%"></div></div>` +
+    `<small>👀 <b>Aperçu</b> : il est apparu en live (sauvage, combat, mini-jeu). 📖 <b>Découvert</b> : quelqu'un l'a capturé, sa page s'écrit ` +
+    `et son découvreur gagne un bonus. Clique sur un Fifrelin pour lire sa fiche.</small>`;
+  $('bestiaire').innerHTML = u.creatures.map(c =>
+    `<button class="bete ${etat(c)} ${etat(c) === 'inconnu' ? 'inconnu' : ''} ${c.legendaire ? 'souverain' : ''}" data-n="${c.numero}" type="button">` +
+    `<span class="n">#${pad(c.numero)}</span>${etat(c) === 'vu' ? '<span class="cadenas" title="Aperçu, pas encore capturé">🔒</span>' : ''}` +
+    `<img src="creatures/${pad(c.numero)}.png" alt="" loading="lazy">` +
+    `<b>${etat(c) === 'inconnu' ? '???' : esc(c.nom)}</b></button>`).join('');
+  $('bestiaire').querySelectorAll('.bete').forEach(b => b.onclick = () => ouvrirFiche(+b.dataset.n));
+}
+
+function ouvrirFiche(n) {
+  const u = donnees.univers, c = u.creatures.find(x => x.numero === n);
+  if (!c) return;
+  const f = $('fiche');
+  const tete = `<div class="tete"><span class="pastille">${c.legendaire ? '👑 Légende' : '📜 Bestiaire'}</span>` +
+    `<b>#${pad(c.numero)}</b><button class="fermer" type="button" aria-label="Fermer">×</button></div>`;
+  const etat = c.etat || (c.decouvert ? 'decouvert' : 'inconnu');
+  const date = x => x ? x.split('-').reverse().join('/') : '';
+  if (etat === 'inconnu') {
+    f.innerHTML = tete + `<div class="fiche-corps"><img class="grand" style="filter:brightness(0) opacity(.6)" src="creatures/${pad(n)}.png" alt="">` +
+      `<div><h3>???</h3><p>Personne ne l'a encore jamais vu. Guette les Fifrelins sauvages en live ou allume une Lampe !</p>` +
+      `<div class="infos">${c.legendaire ? 'Une Légende : extrêmement rare.' : 'Stade ' + c.stade}</div></div></div>`;
+  } else if (etat === 'vu') {
+    f.innerHTML = tete + `<div class="fiche-corps"><img class="grand" src="creatures/${pad(n)}.png" alt="">` +
+      `<div><h3>${esc(c.nom)}</h3>${domainesHtml(c.types)}<p class="verrou">🔒 Aperçu en live${c.vu_le ? ' le ' + date(c.vu_le) : ''}, ` +
+      `mais personne ne l'a encore capturé. Le premier qui l'attrape écrit sa page du Bestiaire… et gagne un bonus !</p>` +
+      `<div class="infos">Taille ${String(c.taille).replace('.', ',')} m · Poids ${String(c.poids).replace('.', ',')} kg · ${c.legendaire ? 'Légende' : 'Stade ' + c.stade}</div></div></div>`;
+  } else {
+    const lignee = c.lignee ? u.creatures.filter(x => x.lignee === c.lignee) : [];
+    f.innerHTML = tete + `<div class="fiche-corps"><img class="grand" src="creatures/${pad(n)}.png" alt="">` +
+      `<div><h3>${esc(c.nom)}</h3>${c.espece ? `<div class="espece">${esc(c.espece)}</div>` : ''}${domainesHtml(c.types)}` +
+      `<p class="entree">${esc(c.description)}</p>` +
+      `<div class="infos">Habitat : <b>${esc(c.habitat || '?')}</b><br>Inspiré ${esc(deLegende(c.inspiration))} · ${esc(c.mythologie)}<br>` +
+      `Taille ${String(c.taille).replace('.', ',')} m · Poids ${String(c.poids).replace('.', ',')} kg · ${c.legendaire ? 'Légende' : 'Stade ' + c.stade}` +
+      (c.decouvert_par ? `<br>📖 Découvert par <b>${esc(c.decouvert_par)}</b>${c.decouvert_le ? ' le ' + date(c.decouvert_le) : ''}` : '') +
+      `</div></div></div>` +
+      (lignee.length > 1 ? '<div class="fiche-lignee">' + lignee.map((x, i) =>
+        (i ? `<span>→ niv. ${u.niveaux[i - 1]}</span>` : '') +
+        `<button type="button" data-n="${x.numero}" class="${x.numero === n ? 'actuel' : ''}">` +
+        `<img src="creatures/${pad(x.numero)}.png" alt="" style="${(x.etat || (x.decouvert ? 'decouvert' : 'inconnu')) === 'inconnu' ? 'filter:brightness(0) opacity(.55)' : ''}"><br>${esc(x.nom)}</button>`).join('') + '</div>' : '');
+  }
+  f.querySelector('.fermer').onclick = () => f.close();
+  f.querySelectorAll('.fiche-lignee button').forEach(b => b.onclick = () => ouvrirFiche(+b.dataset.n));
+  if (!f.open) f.showModal();
+}
+$('fiche').addEventListener('click', e => { if (e.target === $('fiche')) $('fiche').close(); });
+
 // ---------- Accueil ----------
 function afficherAccueil() {
   const d = donnees;
@@ -291,6 +405,7 @@ function afficherAccueil() {
   $('dernieres').innerHTML = (d.dernieres_captures || []).filter(c => c.numero).map(carteMini).join('')
     || '<div class="vide">Aucune capture pour l\'instant.</div>';
 
+  afficherBestiaire(d);
   const tous = [...d.dresseurs].sort((a, b) => b.pokemons.length - a.pokemons.length || a.nom.localeCompare(b.nom));
   $('nbDresseurs').textContent = `${tous.length} dresseurs`;
   $('dresseurs').innerHTML = tous.map(x =>
@@ -298,7 +413,7 @@ function afficherAccueil() {
 
   $('accueil').classList.remove('cache');
   $('vueDex').classList.add('cache');
-  document.title = `Pokédex de ${d.chaine || 'la chaîne'}`;
+  document.title = `Fifrelins — le Dex de ${d.chaine || 'la chaîne'}`;
 }
 
 // ---------- Dex d'un dresseur ----------
@@ -313,28 +428,28 @@ function afficherDex(nom) {
     $('outils').classList.add('cache');
     $('partager').classList.add('cache');
     $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">Aucun dresseur à ce nom pour l'instant. ` +
-      `Capture ton premier Pokémon en live (Pokéball avec les points de chaîne, ou un Pokémon sauvage) !</div>`;
+      `Capture ton premier Fifrelin en live (une Lampe avec les points de chaîne, ou un Fifrelin sauvage) !</div>`;
     return;
   }
   const especes = new Set(x.pokemons.map(p => p.numero)).size;
   const variantes = x.pokemons.filter(p => p.type !== 'normal').length;
   $('titreDex').innerHTML = `${esc(x.nom)}<span>Dex</span>`;
   $('statsDex').innerHTML =
-    `<div>💰 ${x.pieces} poképièces</div><div>${badge(x.rang)}</div>` +
+    `<div>💰 ${x.pieces} liards</div><div>${badge(x.rang)}</div>` +
     `<div>⚔️ ${x.victoires}V / ${x.defaites}D</div>` +
     (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
     (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '');
-  const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 1025));
+  const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
-    `<small>${x.pokemons.length} Pokémon · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 1025}</small>`;
+    `<small>${x.pokemons.length} Fifrelin${x.pokemons.length > 1 ? 's' : ''} · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 99}</small>`;
   $('outils').classList.toggle('cache', !x.pokemons.length);
   $('partager').classList.remove('cache');
   $('partager').onclick = () => copier(location.href, 'Lien copié !');
   dessinerGrille(x);
   $('accueil').classList.add('cache');
   $('vueDex').classList.remove('cache');
-  document.title = `${x.nom}Dex · Pokédex de ${donnees.chaine || 'la chaîne'}`;
+  document.title = `${x.nom}Dex · Fifrelins de ${donnees.chaine || 'la chaîne'}`;
 }
 
 function dessinerGrille(x) {
@@ -346,11 +461,12 @@ function dessinerGrille(x) {
     b.niveau - a.niveau || (RARETE[a.type] ?? 3) - (RARETE[b.type] ?? 3) || a.numero - b.numero);
   $('grille').innerHTML = liste.length ? liste.map(p => {
     const g = p.genre === '♂' ? '<span class="genre m">♂</span>' : p.genre === '♀' ? '<span class="genre f">♀</span>' : '';
-    return `<div class="carte-poke ${p.type}"><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
+    return `<div class="carte-poke ${p.type}" data-n="${p.numero}" style="cursor:pointer"><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
       `<span class="niv">N.${p.niveau}</span>` +
       `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
       `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
-  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Pokémon de ce type.' : 'Aucun Pokémon pour l\'instant.'}</div>`;
+  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Fifrelin de ce type.' : 'Aucun Fifrelin pour l\'instant.'}</div>`;
+  $('grille').querySelectorAll('.carte-poke').forEach(el => el.onclick = () => ouvrirFiche(+el.dataset.n));
 }
 
 document.querySelectorAll('.puce-filtre').forEach(b => b.onclick = () => {
@@ -387,7 +503,7 @@ async function charger() {
     if (!rep.ok) throw new Error(rep.status);
     donnees = await rep.json();
   } catch (e) {
-    if (!donnees) $('etat').textContent = 'Le Pokédex n\'est pas encore disponible. Reviens dans quelques minutes !';
+    if (!donnees) $('etat').textContent = 'Le Dex n\'est pas encore disponible. Reviens dans quelques minutes !';
     return;
   }
   $('etat').classList.add('cache');
