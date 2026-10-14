@@ -201,6 +201,29 @@
   .fiche-corps .espece { font-size: 12px; font-weight: 700; color: var(--gris); text-transform: uppercase; letter-spacing: .6px; margin: -2px 0 6px; }
   .fiche-corps p.entree { font-style: italic; }
   .fiche-corps p.verrou { color: var(--gris); }
+  .nb-table { font-size: 13px; color: var(--gris); margin: 0 0 10px; line-height: 1.5; }
+  .nb-table b { color: var(--texte); }
+  .table-defile { overflow-x: auto; padding-bottom: 4px; }
+  .table-domaines { border-collapse: separate; border-spacing: 3px; margin: 0 auto; }
+  .table-domaines th.lig { text-align: right; padding-right: 4px; white-space: nowrap; position: sticky; left: 0; background: var(--fond); z-index: 1; }
+  .table-domaines .dom { display: inline-block; min-width: 76px; text-align: center; color: #fff; font-weight: 800; font-size: 11.5px;
+    padding: 3px 7px; border-radius: 4px; text-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
+  .table-domaines th.col { height: 84px; min-width: 40px; vertical-align: bottom; padding: 0; }
+  .table-domaines th.col div { transform: rotate(-55deg); transform-origin: left bottom; width: 26px; margin-left: 20px; white-space: nowrap; }
+  .table-domaines th.col span { color: #fff; font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
+  .table-domaines td { width: 40px; height: 28px; background: var(--fond2); border-radius: 4px; text-align: center; font-weight: 900; font-size: 13px; cursor: default; }
+  .table-domaines td.x2, .legende-table .x2 { background: rgba(0, 245, 147, .18); color: var(--vert); box-shadow: inset 0 0 0 1px rgba(0, 245, 147, .45); }
+  .table-domaines td.x05, .legende-table .x05 { background: rgba(245, 0, 155, .14); color: #ff5cbf; box-shadow: inset 0 0 0 1px rgba(245, 0, 155, .4); }
+  .legende-table .x1 { background: var(--fond2); }
+  .table-domaines tr:hover th.lig .dom, .table-domaines td:hover { outline: 2px solid var(--violet-clair); }
+  .legende-table { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--gris); margin: 8px 0 10px; }
+  .legende-table b { display: inline-block; min-width: 30px; text-align: center; border-radius: 4px; padding: 1px 6px; margin-right: 4px; }
+  .variantes-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+  .vt { background: var(--fond2); border: 1px solid var(--bord); border-radius: 8px; padding: 8px 11px; font-size: 13px; }
+  .vt b { display: block; font-size: 14px; } .vt span { color: var(--gris); }
+  .vt.shiny { border-color: #e0b000; } .vt.shiny b { color: #ffd23e; }
+  .vt.obscur { border-color: var(--violet); } .vt.obscur b { color: var(--violet-clair); }
+  .vt.baron { border-color: #e8402a; } .vt.baron b { color: #ff6a50; }
 </style>
 </head>
 <body>
@@ -239,6 +262,21 @@
       <div class="corps">
         <div class="progression" id="progBestiaire"></div>
         <div id="bestiaire" class="bestiaire"></div>
+      </div>
+    </section>
+    <section class="carte" id="blocTable">
+      <div class="tete"><span class="pastille">⚔️ Arène</span><b>Table des domaines</b><span class="tete-droite">qui bat qui en combat</span></div>
+      <div class="corps">
+        <p class="nb-table">Ligne = domaine de l'attaque · colonne = domaine du Fifrelin qui encaisse. Survole une case pour le détail.</p>
+        <div class="table-defile"><table class="table-domaines" id="tableDomaines"></table></div>
+        <div class="legende-table"><span><b class="x2">×2</b> super efficace</span><span><b class="x05">½</b> peu efficace</span><span><b class="x1">&nbsp;</b> normal</span></div>
+        <p class="nb-table">Contre deux domaines, les effets se multiplient (×2 et ×2 = <b>×4</b>, ×2 et ½ = ×1). Chaque Fifrelin attaque avec son domaine
+          le plus efficace et frappe <b>×1,5</b> plus fort avec ses propres domaines. 1 chance sur 12 de coup critique, 6 % de chance de rater, +1 % de stats par niveau.</p>
+        <div class="variantes-table">
+          <div class="vt shiny"><b>✨ Shiny</b><span>+7 % à toutes les stats</span></div>
+          <div class="vt obscur"><b>🌑 Obscur</b><span>+15 % en attaque</span></div>
+          <div class="vt baron"><b>🎩 Baron</b><span>+15 % en PV et défenses</span></div>
+        </div>
       </div>
     </section>
     <section class="carte">
@@ -326,6 +364,21 @@ function carteMini(c) {
 const domainesHtml = types => `<div class="domaines">${types.map(t =>
   `<span class="domaine" style="background:${(donnees.univers.domaines || {})[t] || '#666'}">${esc(t)}</span>`).join('')}</div>`;
 
+function afficherTable(d) {
+  const u = d.univers;
+  if (!u || !u.table) { $('blocTable').classList.add('cache'); return; }
+  const noms = Object.keys(u.domaines), col = n => u.domaines[n];
+  const tete = '<tr><th></th>' + noms.map(n => `<th class="col"><div><span style="background:${col(n)}">${esc(n)}</span></div></th>`).join('') + '</tr>';
+  $('tableDomaines').innerHTML = tete + noms.map(a => `<tr><th class="lig"><span class="dom" style="background:${col(a)}">${esc(a)}</span></th>` +
+    noms.map(b => {
+      const m = (u.table[a] || {})[b] ?? 1;
+      const cls = m > 1 ? 'x2' : m < 1 ? 'x05' : '';
+      const txt = m > 1 ? '×2' : m < 1 ? '½' : '';
+      const bulle = `${a} contre ${b} : ${m > 1 ? 'super efficace (×2)' : m < 1 ? 'peu efficace (×½)' : 'normal (×1)'}`;
+      return `<td class="${cls}" title="${esc(bulle)}">${txt}</td>`;
+    }).join('') + '</tr>').join('');
+}
+
 function afficherBestiaire(d) {
   const u = d.univers;
   if (!u) return;
@@ -406,6 +459,7 @@ function afficherAccueil() {
     || '<div class="vide">Aucune capture pour l\'instant.</div>';
 
   afficherBestiaire(d);
+  afficherTable(d);
   const tous = [...d.dresseurs].sort((a, b) => b.pokemons.length - a.pokemons.length || a.nom.localeCompare(b.nom));
   $('nbDresseurs').textContent = `${tous.length} dresseurs`;
   $('dresseurs').innerHTML = tous.map(x =>
