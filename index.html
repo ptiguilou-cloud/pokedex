@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fifrelins — le Dex de la chaîne</title>
-<meta name="description" content="Le bestiaire des 99 Fifrelins et tous les Dex des dresseurs du stream.">
+<title>Nutons — le Dex de la chaîne</title>
+<meta name="description" content="Le bestiaire des 99 Nutons et tous les Dex des dresseurs du stream.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23fff' stroke='%23222' stroke-width='8'/><path d='M4 50a46 46 0 0 1 92 0z' fill='%23e3350d' stroke='%23222' stroke-width='8'/><circle cx='50' cy='50' r='13' fill='%23fff' stroke='%23222' stroke-width='8'/></svg>">
 <!--
   Page publiée sur GitHub Pages par capture_pokemon.py, avec le fichier donnees.json.
@@ -232,7 +232,7 @@
   <div class="entete">
     <a class="marque" href="#">
       <span class="pokeball" aria-hidden="true"></span>
-      <h1>Fifrelins <span id="nomChaine">du stream</span><small id="maj">Chargement…</small></h1>
+      <h1>Nutons <span id="nomChaine">du stream</span><small id="maj">Chargement…</small></h1>
     </a>
     <form class="recherche" id="recherche" role="search">
       <input id="champ" list="pseudos" placeholder="Ton pseudo Twitch…" autocomplete="off" aria-label="Pseudo du dresseur">
@@ -250,7 +250,7 @@
     <section class="lore" id="lore"></section>
     <section id="blocChampion"></section>
     <section class="carte">
-      <div class="tete"><span class="pastille">🏆 Classement</span><b>Arène des Fifrelins</b></div>
+      <div class="tete"><span class="pastille">🏆 Classement</span><b>Arène des Nutons</b></div>
       <div class="corps"><div id="classement" class="classement"></div></div>
     </section>
     <section class="carte">
@@ -258,7 +258,7 @@
       <div class="corps"><div id="dernieres" class="defile"></div></div>
     </section>
     <section class="carte">
-      <div class="tete"><span class="pastille">📜 Bestiaire</span><b>Les 99 Fifrelins</b><span class="tete-droite" id="nbDecouverts"></span></div>
+      <div class="tete"><span class="pastille">📜 Bestiaire</span><b>Les 99 Nutons</b><span class="tete-droite" id="nbDecouverts"></span></div>
       <div class="corps">
         <div class="progression" id="progBestiaire"></div>
         <div id="bestiaire" class="bestiaire"></div>
@@ -267,10 +267,10 @@
     <section class="carte" id="blocTable">
       <div class="tete"><span class="pastille">⚔️ Arène</span><b>Table des domaines</b><span class="tete-droite">qui bat qui en combat</span></div>
       <div class="corps">
-        <p class="nb-table">Ligne = domaine de l'attaque · colonne = domaine du Fifrelin qui encaisse. Survole une case pour le détail.</p>
+        <p class="nb-table">Ligne = domaine de l'attaque · colonne = domaine du Nuton qui encaisse. Survole une case pour le détail.</p>
         <div class="table-defile"><table class="table-domaines" id="tableDomaines"></table></div>
         <div class="legende-table"><span><b class="x2">×2</b> super efficace</span><span><b class="x05">½</b> peu efficace</span><span><b class="x1">&nbsp;</b> normal</span></div>
-        <p class="nb-table">Contre deux domaines, les effets se multiplient (×2 et ×2 = <b>×4</b>, ×2 et ½ = ×1). Chaque Fifrelin attaque avec son domaine
+        <p class="nb-table">Contre deux domaines, les effets se multiplient (×2 et ×2 = <b>×4</b>, ×2 et ½ = ×1). Chaque Nuton attaque avec son domaine
           le plus efficace et frappe <b>×1,5</b> plus fort avec ses propres domaines. 1 chance sur 12 de coup critique, 6 % de chance de rater, +1 % de stats par niveau.</p>
         <div class="variantes-table">
           <div class="vt shiny"><b>✨ Shiny</b><span>+7 % à toutes les stats</span></div>
@@ -391,7 +391,7 @@ function afficherBestiaire(d) {
   $('progBestiaire').innerHTML = `<div class="barre double"><div class="vus" style="width:${100 * nbVus / total}%"></div>` +
     `<div style="width:${100 * nbDec / total}%"></div></div>` +
     `<small>👀 <b>Aperçu</b> : il est apparu en live (sauvage, combat, mini-jeu). 📖 <b>Découvert</b> : quelqu'un l'a capturé, sa page s'écrit ` +
-    `et son découvreur gagne un bonus. Clique sur un Fifrelin pour lire sa fiche.</small>`;
+    `et son découvreur gagne un bonus. Clique sur un Nuton pour lire sa fiche.</small>`;
   $('bestiaire').innerHTML = u.creatures.map(c =>
     `<button class="bete ${etat(c)} ${etat(c) === 'inconnu' ? 'inconnu' : ''} ${c.legendaire ? 'souverain' : ''}" data-n="${c.numero}" type="button">` +
     `<span class="n">#${pad(c.numero)}</span>${etat(c) === 'vu' ? '<span class="cadenas" title="Aperçu, pas encore capturé">🔒</span>' : ''}` +
@@ -410,7 +410,7 @@ function ouvrirFiche(n) {
   const date = x => x ? x.split('-').reverse().join('/') : '';
   if (etat === 'inconnu') {
     f.innerHTML = tete + `<div class="fiche-corps"><img class="grand" style="filter:brightness(0) opacity(.6)" src="creatures/${pad(n)}.png" alt="">` +
-      `<div><h3>???</h3><p>Personne ne l'a encore jamais vu. Guette les Fifrelins sauvages en live ou allume une Lampe !</p>` +
+      `<div><h3>???</h3><p>Personne ne l'a encore jamais vu. Guette les Nutons sauvages en live ou allume une Lampe !</p>` +
       `<div class="infos">${c.legendaire ? 'Une Légende : extrêmement rare.' : 'Stade ' + c.stade}</div></div></div>`;
   } else if (etat === 'vu') {
     f.innerHTML = tete + `<div class="fiche-corps"><img class="grand" src="creatures/${pad(n)}.png" alt="">` +
@@ -467,7 +467,7 @@ function afficherAccueil() {
 
   $('accueil').classList.remove('cache');
   $('vueDex').classList.add('cache');
-  document.title = `Fifrelins — le Dex de ${d.chaine || 'la chaîne'}`;
+  document.title = `Nutons — le Dex de ${d.chaine || 'la chaîne'}`;
 }
 
 // ---------- Dex d'un dresseur ----------
@@ -482,7 +482,7 @@ function afficherDex(nom) {
     $('outils').classList.add('cache');
     $('partager').classList.add('cache');
     $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">Aucun dresseur à ce nom pour l'instant. ` +
-      `Capture ton premier Fifrelin en live (une Lampe avec les points de chaîne, ou un Fifrelin sauvage) !</div>`;
+      `Capture ton premier Nuton en live (une Lampe avec les points de chaîne, ou un Nuton sauvage) !</div>`;
     return;
   }
   const especes = new Set(x.pokemons.map(p => p.numero)).size;
@@ -496,14 +496,14 @@ function afficherDex(nom) {
     (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
-    `<small>${x.pokemons.length} Fifrelin${x.pokemons.length > 1 ? 's' : ''} · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 99}</small>`;
+    `<small>${x.pokemons.length} Nuton${x.pokemons.length > 1 ? 's' : ''} · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 99}</small>`;
   $('outils').classList.toggle('cache', !x.pokemons.length);
   $('partager').classList.remove('cache');
   $('partager').onclick = () => copier(location.href, 'Lien copié !');
   dessinerGrille(x);
   $('accueil').classList.add('cache');
   $('vueDex').classList.remove('cache');
-  document.title = `${x.nom}Dex · Fifrelins de ${donnees.chaine || 'la chaîne'}`;
+  document.title = `${x.nom}Dex · Nutons de ${donnees.chaine || 'la chaîne'}`;
 }
 
 function dessinerGrille(x) {
@@ -519,7 +519,7 @@ function dessinerGrille(x) {
       `<span class="niv">N.${p.niveau}</span>` +
       `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
       `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
-  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Fifrelin de ce type.' : 'Aucun Fifrelin pour l\'instant.'}</div>`;
+  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Nuton de ce type.' : 'Aucun Nuton pour l\'instant.'}</div>`;
   $('grille').querySelectorAll('.carte-poke').forEach(el => el.onclick = () => ouvrirFiche(+el.dataset.n));
 }
 
