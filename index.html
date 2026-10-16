@@ -242,6 +242,120 @@
   .vt.shiny { border-color: #e0b000; } .vt.shiny b { color: #ffd23e; }
   .vt.obscur { border-color: var(--violet); } .vt.obscur b { color: var(--violet-clair); }
   .vt.baron { border-color: #e8402a; } .vt.baron b { color: #ff6a50; }
+
+  /* ---------- Succès ---------- */
+  #blocSucces { margin-top: 20px; display: grid; gap: 16px; }
+  #blocSucces section { margin-top: 0; }
+  .grille-succes { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 8px; }
+  .succes { background: var(--fond2); border: 1px solid var(--bord); border-radius: 8px; padding: 9px 11px 10px; border-top: 3px solid var(--bord); }
+  .succes.r1 { border-top-color: #b07a4a; } .succes.r2 { border-top-color: #b9c0cc; } .succes.r3 { border-top-color: var(--jaune); }
+  .succes .haut { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .succes .haut b { font-size: 15px; flex: 1; }
+  .rangs { display: flex; gap: 3px; }
+  .rangs i { font-style: normal; font-size: 10px; font-weight: 900; min-width: 22px; text-align: center; padding: 2px 0; border-radius: 3px;
+    background: var(--fond3); color: #6d6d78; }
+  .rangs i.ok { background: var(--b); color: #18181b; }
+  .objectifs { list-style: none; margin: 0; padding: 0; font-size: 12.5px; display: grid; gap: 3px; }
+  .objectifs li { display: grid; grid-template-columns: 16px 1fr auto; gap: 5px; align-items: center; color: var(--gris); }
+  .objectifs li.ok { color: var(--texte); }
+  .objectifs li .c { font-weight: 900; text-align: center; }
+  .objectifs li.ok .c { color: var(--vert); }
+  .objectifs li small { font-variant-numeric: tabular-nums; color: var(--gris); }
+  .mini-barre { grid-column: 2 / -1; height: 4px; background: var(--fond3); border-radius: 2px; overflow: hidden; }
+  .mini-barre div { height: 100%; background: var(--violet); }
+  .succes .effet { margin-top: 7px; font-size: 12px; color: var(--gris); }
+  .succes .effet b { color: var(--texte); }
+  .succes.cache-succes { border-style: dashed; display: grid; place-items: center; text-align: center; color: var(--gris); min-height: 120px; }
+  .succes.originel { border-color: var(--jaune); background: linear-gradient(160deg, rgba(255, 203, 5, .18), var(--fond2) 60%); }
+  .succes.originel .haut b { color: var(--jaune); }
+
+  /* Choix de l'effet */
+  .atelier { display: grid; grid-template-columns: 230px 1fr; gap: 16px; align-items: start; }
+  .scene { position: relative; height: 230px; border-radius: 8px; display: grid; place-items: center; overflow: hidden;
+    background: radial-gradient(circle at 50% 62%, rgba(145, 70, 255, .25), transparent 62%), var(--page); border: 1px solid var(--bord); }
+  .porteur { position: relative; width: 120px; height: 120px; }
+  .porteur img { width: 120px; height: 120px; position: relative; z-index: 2; }
+  .scene .legende { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 12px; color: var(--gris); }
+  .scene .rejouer { position: absolute; top: 8px; right: 8px; background: var(--fond3); border: 0; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+  .liste-fx { display: grid; gap: 4px; }
+  .ligne-fx { display: grid; grid-template-columns: 26px 118px 1fr; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 6px; }
+  .ligne-fx.choisie { background: var(--fond3); }
+  .ligne-fx .ico { font-size: 18px; text-align: center; }
+  .ligne-fx .nomfx { font-weight: 700; font-size: 14px; }
+  .ligne-fx .nomfx small { display: block; font-weight: 400; font-size: 11px; color: var(--gris); }
+  .ligne-fx.verrou .nomfx { color: var(--gris); }
+  .pastilles { display: flex; flex-wrap: wrap; gap: 5px; }
+  .teinte { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--fond); background: var(--t); cursor: pointer; padding: 0;
+    box-shadow: 0 0 0 1px var(--bord); transition: transform .12s; position: relative; }
+  .teinte:hover { transform: scale(1.15); }
+  .teinte.verrou { opacity: .28; }
+  .teinte.verrou::after { content: '🔒'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 10px; filter: grayscale(1); }
+  .teinte.actif { box-shadow: 0 0 0 2px var(--texte); }
+  .teinte.equipe::before { content: ''; position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--vert); border: 2px solid var(--fond); }
+  .teinte:focus-visible { outline: 2px solid var(--violet-clair); outline-offset: 2px; }
+  .commande { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border-radius: 8px; background: var(--fond2); border: 1px solid var(--bord); }
+  .commande code { font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace; font-weight: 800; font-size: 16px; background: var(--page);
+    padding: 6px 10px; border-radius: 6px; flex: 1 1 160px; min-width: 0; }
+  .commande .info { flex-basis: 100%; font-size: 12.5px; color: var(--gris); }
+  .commande .info.alerte { color: #ff9a3c; }
+  .bouton:disabled { opacity: .45; cursor: not-allowed; }
+  .legende-fx { font-size: 12.5px; color: var(--gris); margin: 0 0 10px; }
+  @media (max-width: 640px) { .atelier { grid-template-columns: 1fr; } .ligne-fx { grid-template-columns: 26px 1fr; } .ligne-fx .pastilles { grid-column: 1 / -1; } }
+
+  /* Encyclopédie collaborative */
+  .encyclo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .encyclo .gros { font-size: 34px; font-weight: 900; line-height: 1; }
+  .encyclo .gros span { font-size: 16px; color: var(--gris); font-weight: 600; }
+  .encyclo ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; counter-reset: c; }
+  .encyclo li { display: flex; gap: 8px; align-items: center; font-size: 14px; padding: 4px 8px; border-radius: 4px; background: var(--fond2); counter-increment: c; }
+  .encyclo li::before { content: counter(c); font-weight: 900; color: var(--gris); width: 18px; text-align: center; }
+  .encyclo li:first-child { border: 1px solid var(--jaune); }
+  .encyclo li a { flex: 1; text-decoration: none; font-weight: 700; }
+  .encyclo li a:hover { text-decoration: underline; }
+  .encyclo .secret { margin-top: 10px; font-size: 13px; color: var(--gris); }
+  .encyclo .secret b { color: var(--jaune); }
+  @media (max-width: 640px) { .encyclo { grid-template-columns: 1fr; } }
+
+  /* Effets de combat (mêmes animations que l'overlay du stream) */
+  .fx { position: absolute; inset: -34px; pointer-events: none; z-index: 3; }
+  .fx span { position: absolute; }
+  .fx-anneau { inset: 30px; border-radius: 50%; border: 4px solid var(--fx); box-shadow: 0 0 18px var(--fx), inset 0 0 12px var(--fx);
+    opacity: 0; animation: fxPulse 1.3s ease-out forwards; }
+  .fx-onde { border-width: 3px; animation-name: fxOnde; }
+  .fx-eclair { width: 28px; height: 46px; opacity: 0; animation: fxFlash .45s steps(2) 3 forwards; filter: drop-shadow(0 0 6px var(--fx)); }
+  .fx-eclair svg { width: 100%; height: 100%; fill: var(--fx); }
+  .fx-feuille { top: 0; width: 11px; height: 17px; border-radius: 0 100% 0 100%; background: var(--fx); opacity: 0;
+    animation: fxTombe 1.8s ease-in forwards; }
+  .fx-confetti { left: 50%; top: 50%; width: 7px; height: 12px; background: var(--fx); opacity: 0; animation: fxEclate 1.5s ease-out forwards; }
+  .fx-flamme { bottom: 22%; width: var(--t); height: calc(var(--t) * 1.6); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: radial-gradient(circle at 50% 70%, #fff, var(--fx) 60%); opacity: 0; animation: fxMonte 1.2s ease-out forwards; }
+  .fx-bulle { bottom: 18%; width: var(--t); height: var(--t); border-radius: 50%; border: 2px solid var(--fx);
+    box-shadow: inset -2px -2px 0 rgba(255, 255, 255, .5); opacity: 0; animation: fxMonte 1.9s ease-out forwards; }
+  .fx-point { left: 50%; top: 50%; width: 9px; height: 9px; margin: -4px; border-radius: 50%; background: var(--fx);
+    box-shadow: 0 0 10px var(--fx); opacity: 0; animation: fxSpirale 2.2s ease-out forwards; }
+  .fx-glyphe { bottom: 20%; font-size: 28px; font-weight: 900; color: var(--fx); text-shadow: 0 0 8px var(--fx), 0 2px 2px #000;
+    opacity: 0; animation: fxMonte 1.9s ease-out forwards; }
+  .fx-rayons { inset: 0; border-radius: 50%; opacity: 0;
+    background: repeating-conic-gradient(var(--fx) 0 9deg, transparent 9deg 30deg);
+    -webkit-mask: radial-gradient(circle, transparent 28%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 28%, #000 32%, transparent 70%);
+    animation: fxTourne 3s linear forwards; }
+  .fx-grande-etoile { left: 50%; top: 50%; font-size: 130px; line-height: 1; color: var(--fx); margin: -65px 0 0 -52px;
+    text-shadow: 0 0 22px var(--fx), 0 0 4px #fff; opacity: 0; animation: fxEtoile 3s ease-out forwards; z-index: -1; }
+  .fx-etincelle { left: 50%; top: 50%; font-size: 20px; color: var(--fx); text-shadow: 0 0 8px var(--fx); opacity: 0;
+    animation: fxEclate 1.4s ease-out forwards; }
+  @keyframes fxPulse { 0% { transform: scale(.5); opacity: 0; } 25% { opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+  @keyframes fxOnde { 0% { transform: scale(.3); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(2.1); opacity: 0; } }
+  @keyframes fxFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes fxTombe { 0% { transform: translate(0, -10px) rotate(0); opacity: 0; } 15% { opacity: 1; }
+    100% { transform: translate(var(--x), 140px) rotate(400deg); opacity: 0; } }
+  @keyframes fxEclate { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) rotate(var(--r, 0deg)); opacity: 0; } }
+  @keyframes fxMonte { 0% { transform: translateY(0) scale(.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-110px) scale(1.1); opacity: 0; } }
+  @keyframes fxSpirale { 0% { transform: rotate(var(--a)) translateX(8px); opacity: 0; } 15% { opacity: 1; }
+    100% { transform: rotate(calc(var(--a) + 600deg)) translateX(70px); opacity: 0; } }
+  @keyframes fxTourne { 0% { transform: rotate(0) scale(.6); opacity: 0; } 20% { opacity: .85; } 80% { opacity: .85; } 100% { transform: rotate(160deg) scale(1.15); opacity: 0; } }
+  @keyframes fxEtoile { 0% { transform: scale(0) rotate(-200deg); opacity: 0; } 35% { transform: scale(1.1) rotate(0); opacity: 1; }
+    75% { transform: scale(1) rotate(10deg); opacity: 1; } 100% { transform: scale(1.3) rotate(20deg); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -281,6 +395,10 @@
         <div class="progression" id="progBestiaire"></div>
         <div id="bestiaire" class="bestiaire"></div>
       </div>
+    </section>
+    <section class="carte" id="blocEncyclo">
+      <div class="tete"><span class="pastille">📚 Encyclopédie</span><b>L'encyclopédie collaborative</b><span class="tete-droite" id="nbEncyclo"></span></div>
+      <div class="corps" id="encyclo"></div>
     </section>
     <section class="carte" id="blocTable">
       <div class="tete"><span class="pastille">⚔️ Arène</span><b>Table des domaines</b><span class="tete-droite">qui bat qui en combat</span></div>
@@ -326,6 +444,31 @@
     </div>
     <fieldset class="filtre-types" id="filtreTypes" style="border:0;padding:0;min-width:0"></fieldset>
     <div id="grille" class="grille"></div>
+    <div id="blocSucces">
+      <section class="carte">
+        <div class="tete"><span class="pastille">🏆 Succès</span><b>Les succès</b><span class="tete-droite" id="totalSucces"></span></div>
+        <div class="corps"><div id="grilleSucces" class="grille-succes"></div></div>
+      </section>
+      <section class="carte">
+        <div class="tete"><span class="pastille">✨ Effets</span><b>Effet de combat</b><span class="tete-droite">s'affiche au début des combats entre dresseurs</span></div>
+        <div class="corps">
+          <p class="legende-fx">Clique sur une couleur pour voir l'effet, puis copie la commande et colle-la dans le chat du live.
+            Chaque succès débloque son effet en 1 couleur (rang I), puis 3 couleurs de plus (rang II), puis les 4 dernières (rang III).</p>
+          <div class="atelier">
+            <div class="scene" id="scene"><div class="porteur" id="porteur"></div><button class="rejouer" id="rejouer" type="button">↻ Rejouer</button><div class="legende" id="legendeScene"></div></div>
+            <div>
+              <div class="liste-fx" id="listeFx"></div>
+              <div class="commande">
+                <code id="cmdFx">!fx</code>
+                <button class="bouton" id="copierFx" type="button">📋 Copier la commande</button>
+                <button class="bouton secondaire" id="copierOff" type="button" title="Retirer son effet">!fx off</button>
+                <div class="info" id="infoFx"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <footer id="pied"></footer>
@@ -487,6 +630,153 @@ function ouvrirFiche(n) {
 }
 $('fiche').addEventListener('click', e => { if (e.target === $('fiche')) $('fiche').close(); });
 
+// ---------- Succès et effets ----------
+const ICONES_FX = { eclairs: '⚡', aura: '◎', feuilles: '🍃', confettis: '🎊', flammes: '🔥', bulles: '🫧', spirale: '🌀',
+                    onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★' };
+const CHIFFRES = ['', 'I', 'II', 'III'];
+const COUL_RANG = ['', '#d89a64', '#dfe4ec', '#ffcb05'];
+const majuscule = s => s.charAt(0).toUpperCase() + s.slice(1);
+const ECLAIR_SVG = '<svg viewBox="0 0 30 50" aria-hidden="true"><path d="M18 0 L4 28 L14 28 L8 50 L26 18 L15 18 L22 0 Z"/></svg>';
+let choixFx = null;   // { type, couleur } en cours d'aperçu
+let dernierAtelier = '';
+
+const succesDe = nom => ((donnees.succes || {}).joueurs || {})[cleNom(nom)] || null;
+
+// Pour chaque effet : couleurs dans l'ordre de déblocage, et rang nécessaire pour chacune
+function catalogueFx(js) {
+  const S = donnees.succes, res = [];
+  for (const f of S.familles) {
+    const ordre = [f.couleur, ...S.ordre.filter(c => c !== f.couleur)];
+    const rang = (js.rangs || {})[f.cle] || 0;
+    res.push({ type: f.fx, nom: f.fx_nom, famille: f, couleurs: ordre,
+               rangPour: c => { const i = ordre.indexOf(c); return i === 0 ? 1 : i < 4 ? 2 : 3; },
+               ok: c => rang >= (ordre.indexOf(c) === 0 ? 1 : ordre.indexOf(c) < 4 ? 2 : 3) });
+  }
+  if (js.originel) res.push({ type: S.originel.fx, nom: S.originel.fx_nom, famille: null, couleurs: [...S.ordre], rangPour: () => 1, ok: () => true });
+  return res;
+}
+
+function lancerFx(zone, type, coul) {
+  zone.querySelectorAll('.fx').forEach(e => e.remove());
+  const L = document.createElement('div');
+  L.className = 'fx fx-' + type;
+  L.style.setProperty('--fx', coul);
+  const H = (a, b) => a + Math.random() * (b - a);
+  const P = (cls, n, f) => { for (let i = 0; i < n; i++) { const s = document.createElement('span'); s.className = cls; f(s, i); L.append(s); } };
+  const eclat = (s, d1, d2) => { const a = H(0, 6.28), d = H(d1, d2); s.style.setProperty('--x', Math.cos(a) * d + 'px'); s.style.setProperty('--y', Math.sin(a) * d + 'px'); };
+  switch (type) {
+    case 'aura': P('fx-anneau', 4, (s, i) => s.style.animationDelay = i * .5 + 's'); break;
+    case 'onde': P('fx-anneau fx-onde', 5, (s, i) => s.style.animationDelay = i * .35 + 's'); break;
+    case 'eclairs': P('fx-eclair', 7, (s, i) => { s.innerHTML = ECLAIR_SVG; s.style.left = H(0, 78) + '%'; s.style.top = H(0, 55) + '%';
+      s.style.transform = `rotate(${H(-35, 35)}deg)`; s.style.animationDelay = i * .3 + 's'; }); break;
+    case 'feuilles': P('fx-feuille', 14, s => { s.style.left = H(0, 95) + '%'; s.style.animationDelay = H(0, 1.4) + 's'; s.style.setProperty('--x', H(-50, 50) + 'px'); }); break;
+    case 'confettis': P('fx-confetti', 28, s => { eclat(s, 50, 120); s.style.setProperty('--r', H(-500, 500) + 'deg'); s.style.animationDelay = H(0, .8) + 's';
+      s.style.filter = `hue-rotate(${H(-45, 45)}deg)`; }); break;
+    case 'flammes': P('fx-flamme', 16, s => { s.style.left = H(10, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; s.style.setProperty('--t', H(12, 24) + 'px'); }); break;
+    case 'bulles': P('fx-bulle', 14, s => { s.style.left = H(5, 90) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; s.style.setProperty('--t', H(8, 20) + 'px'); }); break;
+    case 'spirale': P('fx-point', 12, (s, i) => { s.style.setProperty('--a', i * 30 + 'deg'); s.style.animationDelay = i * .07 + 's'; }); break;
+    case 'notes': P('fx-glyphe', 12, (s, i) => { s.textContent = i % 2 ? '♪' : '♫'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
+    case 'coeurs': P('fx-glyphe', 12, s => { s.textContent = '♥'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
+    case 'rayons': P('fx-rayons', 1, () => {}); break;
+    case 'etoile': P('fx-grande-etoile', 1, s => s.textContent = '★');
+      P('fx-etincelle', 18, s => { s.textContent = '✦'; eclat(s, 60, 130); s.style.animationDelay = H(.4, 1.2) + 's'; }); break;
+  }
+  zone.append(L);
+  setTimeout(() => L.remove(), 3300);
+}
+
+function afficherSucces(nom, pokemons) {
+  const S = donnees.succes;
+  if (!S || !S.familles) { $('blocSucces').classList.add('cache'); return; }
+  $('blocSucces').classList.remove('cache');
+  const js = succesDe(nom) || { rangs: {}, stats: {}, fx: null, originel: false };
+  const rangs = js.rangs || {}, st = js.stats || {};
+  const total = S.familles.reduce((s, f) => s + (rangs[f.cle] || 0), 0);
+  $('totalSucces').textContent = `${total} / ${3 * S.familles.length} rangs`;
+
+  const tuile = f => {
+    const r = rangs[f.cle] || 0;
+    return `<div class="succes r${r}"><div class="haut"><b>${esc(f.nom)}</b><span class="rangs">` +
+      [1, 2, 3].map(k => `<i class="${r >= k ? 'ok' : ''}" style="--b:${COUL_RANG[k]}">${CHIFFRES[k]}</i>`).join('') + '</span></div>' +
+      '<ul class="objectifs">' + f.rangs.map((o, i) => {
+        const fait = r >= i + 1, v = Math.min(st[o.stat] || 0, o.seuil);
+        const prochain = !fait && i === r;   // objectif en cours : on montre la progression
+        return `<li class="${fait ? 'ok' : ''}"><span class="c">${fait ? '✓' : '○'}</span><span>${esc(o.objectif)}</span>` +
+          (prochain && o.seuil > 1 ? `<small>${v}/${o.seuil}</small><div class="mini-barre"><div style="width:${100 * v / o.seuil}%"></div></div>` : '<span></span>') + '</li>';
+      }).join('') + '</ul>' +
+      `<div class="effet">${ICONES_FX[f.fx] || ''} Effet <b>${esc(f.fx_nom)}</b> · ${r ? [0, 1, 4, 8][r] + ' couleur' + (r > 1 ? 's' : '') : 'verrouillé'}</div></div>`;
+  };
+  $('grilleSucces').innerHTML = S.familles.map(tuile).join('') + (js.originel
+    ? `<div class="succes originel r3"><div class="haut"><b>🌟 ${esc(S.originel.nom)}</b></div>` +
+      `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Plus grand explorateur de l'encyclopédie complète</span><span></span></li></ul>` +
+      `<div class="effet">★ Effet <b>${esc(S.originel.fx_nom)}</b> · 8 couleurs</div></div>`
+    : `<div class="succes cache-succes"><div><b style="font-size:22px">???</b><br>Succès caché</div></div>`);
+
+  // ----- atelier d'effets
+  const cat = catalogueFx(js);
+  const meilleur = [...(pokemons || [])].sort((a, b) => b.niveau - a.niveau)[0];
+  $('porteur').innerHTML = meilleur
+    ? `<img src="${sprite(meilleur.numero, meilleur.type)}" ${secours(meilleur.numero)} alt="${esc(meilleur.nom)}">`
+    : `<img src="creatures/001.png" alt="">`;
+  const equipe = js.fx;
+  if (!choixFx || !cat.some(e => e.type === choixFx.type)) {
+    const premier = cat.find(e => e.ok(e.couleurs[0]));
+    choixFx = equipe ? { ...equipe } : premier ? { type: premier.type, couleur: premier.couleurs[0] } : { type: cat[0].type, couleur: cat[0].couleurs[0] };
+  }
+  const dessiner = jouer => {
+    $('listeFx').innerHTML = cat.map(e => {
+      const aucun = !e.ok(e.couleurs[0]);
+      const sous = e.famille ? (aucun ? `succès ${e.famille.nom} I` : `succès ${e.famille.nom}`) : 'succès caché';
+      return `<div class="ligne-fx ${aucun ? 'verrou' : ''} ${choixFx.type === e.type ? 'choisie' : ''}">` +
+        `<span class="ico">${ICONES_FX[e.type] || '✦'}</span><span class="nomfx">${esc(e.nom)}<small>${esc(sous)}</small></span><span class="pastilles">` +
+        e.couleurs.map(c => {
+          const ok = e.ok(c), actif = choixFx.type === e.type && choixFx.couleur === c;
+          const eq = equipe && equipe.type === e.type && equipe.couleur === c;
+          const bulle = majuscule(c) + (ok ? '' : ` · débloquée au rang ${CHIFFRES[e.rangPour(c)]}`) + (eq ? ' · équipé' : '');
+          return `<button type="button" class="teinte ${ok ? '' : 'verrou'} ${actif ? 'actif' : ''} ${eq ? 'equipe' : ''}" style="--t:${S.couleurs[c]}" ` +
+            `data-t="${e.type}" data-c="${c}" title="${esc(bulle)}" aria-label="${esc(e.nom + ' ' + bulle)}" aria-pressed="${actif}"></button>`;
+        }).join('') + '</span></div>';
+    }).join('');
+    $('listeFx').querySelectorAll('.teinte').forEach(b => b.onclick = () => { choixFx = { type: b.dataset.t, couleur: b.dataset.c }; dessiner(true); });
+    const e = cat.find(x => x.type === choixFx.type), ok = e.ok(choixFx.couleur);
+    const cmd = `!fx ${choixFx.type} ${choixFx.couleur}`;
+    $('cmdFx').textContent = cmd;
+    $('copierFx').disabled = !ok;
+    $('copierFx').onclick = () => copier(cmd, 'Commande copiée : colle-la dans le chat !');
+    $('copierOff').onclick = () => copier('!fx off', 'Commande copiée : colle-la dans le chat !');
+    const estEquipe = equipe && equipe.type === choixFx.type && equipe.couleur === choixFx.couleur;
+    $('infoFx').className = 'info' + (ok ? '' : ' alerte');
+    $('infoFx').innerHTML = ok
+      ? (estEquipe ? '✅ C\'est l\'effet équipé en ce moment.' : `À coller dans le chat du live, depuis ton compte Twitch.` +
+         (equipe ? ` Effet équipé actuellement : <b>${esc(cat.find(x => x.type === equipe.type)?.nom || equipe.type)} ${esc(equipe.couleur)}</b>.` : ''))
+      : `🔒 Cette couleur se débloque avec le succès <b>${esc(e.famille.nom)} ${CHIFFRES[e.rangPour(choixFx.couleur)]}</b> : ` +
+        `« ${esc(e.famille.rangs[e.rangPour(choixFx.couleur) - 1].objectif)} ».`;
+    $('legendeScene').textContent = `${e.nom} · ${majuscule(choixFx.couleur)}`;
+    if (jouer) lancerFx($('porteur'), choixFx.type, S.couleurs[choixFx.couleur]);
+  };
+  $('rejouer').onclick = () => lancerFx($('porteur'), choixFx.type, S.couleurs[choixFx.couleur]);
+  dessiner(false);
+  if (cleNom(nom) !== dernierAtelier) setTimeout(() => lancerFx($('porteur'), choixFx.type, S.couleurs[choixFx.couleur]), 500);
+  dernierAtelier = cleNom(nom);
+}
+
+function afficherEncyclo(d) {
+  const E = (d.succes || {}).encyclopedie;
+  if (!E) { $('blocEncyclo').classList.add('cache'); return; }
+  const ori = d.succes.originel || {};
+  $('nbEncyclo').textContent = `${Math.round(100 * E.decouverts / E.total)} % complète`;
+  $('encyclo').innerHTML = `<div class="encyclo"><div>` +
+    `<div class="gros">${E.decouverts}<span> / ${E.total} espèces capturées par la communauté</span></div>` +
+    `<div class="progression" style="margin-top:10px"><div class="barre double"><div class="vus" style="width:${100 * E.vus / E.total}%"></div>` +
+    `<div style="width:${100 * E.decouverts / E.total}%"></div></div><small>${E.vus} espèces aperçues en live. Chaque première capture écrit une page de l'encyclopédie.</small></div>` +
+    `<div class="secret">${ori.titulaire
+      ? `🌟 <b>${esc(ori.nom)}</b> : <a href="#${encodeURIComponent(ori.titulaire)}">${esc(ori.titulaire)}</a>`
+      : `🔒 Quand l'encyclopédie sera complète, l'explorateur qui a le plus contribué recevra un succès caché…`}</div></div>` +
+    `<div><b style="font-size:14px">Les plus grands explorateurs</b><ol style="margin-top:8px">${E.top.length
+      ? E.top.map(t => `<li><a href="#${encodeURIComponent(t.nom)}">${esc(t.nom)}</a><span>${t.n} espèce${t.n > 1 ? 's' : ''}</span></li>`).join('')
+      : '<div class="vide">Personne n\'a encore découvert d\'espèce.</div>'}</ol></div></div>`;
+}
+
 // ---------- Accueil ----------
 function afficherAccueil() {
   const d = donnees;
@@ -509,6 +799,7 @@ function afficherAccueil() {
     || '<div class="vide">Aucune capture pour l\'instant.</div>';
 
   afficherBestiaire(d);
+  afficherEncyclo(d);
   afficherTable(d);
   const tous = [...d.dresseurs].sort((a, b) => b.pokemons.length - a.pokemons.length || a.nom.localeCompare(b.nom));
   $('nbDresseurs').textContent = `${tous.length} dresseurs`;
@@ -531,8 +822,11 @@ function afficherDex(nom) {
     $('progression').innerHTML = '';
     $('outils').classList.add('cache');
     $('partager').classList.add('cache');
-    $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">Aucun dresseur à ce nom pour l'instant. ` +
+    const js = donnees.succes && succesDe(nom);
+    if (js) $('titreDex').innerHTML = `${esc(js.nom)}<span>Dex</span>`;
+    $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">${js ? 'Aucun Nuton pour l\'instant.' : 'Aucun dresseur à ce nom pour l\'instant.'} ` +
       `Capture ton premier Nuton en live (une Lampe avec les points de chaîne, ou un Nuton sauvage) !</div>`;
+    if (js) afficherSucces(js.nom, []); else $('blocSucces').classList.add('cache');
     return;
   }
   const especes = new Set(x.pokemons.map(p => p.numero)).size;
@@ -543,7 +837,8 @@ function afficherDex(nom) {
     `<div>⚔️ ${x.victoires}V / ${x.defaites}D</div>` +
     (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
-    (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '');
+    (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '') +
+    (donnees.succes ? `<div><a href="javascript:void 0" id="versSucces" style="text-decoration:none">🏆 Succès et effets ↓</a></div>` : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
     `<small>${x.pokemons.length} Nuton${x.pokemons.length > 1 ? 's' : ''} · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 99}</small>`;
@@ -552,6 +847,9 @@ function afficherDex(nom) {
   $('partager').onclick = () => copier(location.href, 'Lien copié !');
   dessinerFiltreTypes(x);
   dessinerGrille(x);
+  afficherSucces(x.nom, x.pokemons);
+  const vs = $('versSucces');
+  if (vs) vs.onclick = () => $('blocSucces').scrollIntoView({ behavior: 'smooth' });
   $('accueil').classList.add('cache');
   $('vueDex').classList.remove('cache');
   document.title = `${x.nom}Dex · Nutons de ${donnees.chaine || 'la chaîne'}`;
@@ -594,7 +892,7 @@ function router() {
   const nom = decodeURIComponent(location.hash.slice(1)).trim().replace(/^@/, '');
   if (nom) afficherDex(nom); else afficherAccueil();
 }
-window.addEventListener('hashchange', () => { filtre = 'tous'; typesCoches.clear(); document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { filtre = 'tous'; choixFx = null; dernierAtelier = ''; typesCoches.clear(); document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
 $('recherche').onsubmit = e => {
   e.preventDefault();
   const v = $('champ').value.trim().replace(/^@/, '');
