@@ -121,6 +121,18 @@
   .puce-filtre[aria-pressed="true"] { background: var(--violet); color: #fff; }
   .outils select { margin-left: auto; padding: 6px 10px; border-radius: 4px; border: 2px solid transparent; background: var(--fond3); }
   .outils select:focus { border-color: var(--violet); outline: none; }
+  .filtre-types { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 12px; }
+  .filtre-types > span { font-size: 13px; color: var(--gris); margin-right: 2px; }
+  .case-type { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 4px;
+    border: 2px solid var(--coul); font-size: 13px; font-weight: 800; cursor: pointer; user-select: none; transition: background .15s; }
+  .case-type input { position: absolute; opacity: 0; pointer-events: none; }
+  .case-type .coche { width: 14px; height: 14px; border-radius: 3px; border: 2px solid var(--coul); display: grid; place-items: center;
+    font-size: 11px; line-height: 1; }
+  .case-type:has(input:checked) { background: var(--coul); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.5); }
+  .case-type:has(input:checked) .coche { background: #fff; color: #18181b; border-color: #fff; text-shadow: none; }
+  .case-type:has(input:checked) .coche::after { content: '✓'; }
+  .case-type:has(input:focus-visible) { outline: 2px solid var(--violet-clair); outline-offset: 2px; }
+  .effacer-types { background: none; border: 0; color: var(--violet-clair); font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px 6px; }
   .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; }
   .carte-poke { position: relative; background: var(--fond); border: 1px solid var(--bord); border-radius: 8px;
     padding: 8px 8px 10px; text-align: center; transition: transform .15s, border-color .15s; }
@@ -201,6 +213,12 @@
   .fiche-corps .espece { font-size: 12px; font-weight: 700; color: var(--gris); text-transform: uppercase; letter-spacing: .6px; margin: -2px 0 6px; }
   .fiche-corps p.entree { font-style: italic; }
   .fiche-corps p.verrou { color: var(--gris); }
+  .fiche-stats { padding: 0 14px 12px; display: grid; grid-template-columns: auto 34px 1fr; gap: 5px 10px; align-items: center; font-size: 12px; }
+  .fiche-stats .lib { color: var(--gris); }
+  .fiche-stats .val { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .fiche-stats .barre { height: 8px; border-radius: 4px; background: var(--fond3); overflow: hidden; }
+  .fiche-stats .barre i { display: block; height: 100%; border-radius: 4px; }
+  .fiche-stats .total { grid-column: 1 / -1; color: var(--gris); border-top: 1px solid var(--bord); padding-top: 6px; }
   .nb-table { font-size: 13px; color: var(--gris); margin: 0 0 10px; line-height: 1.5; }
   .nb-table b { color: var(--texte); }
   .table-defile { overflow-x: auto; padding-bottom: 4px; }
@@ -306,6 +324,7 @@
         <option value="rarete">Trier par rareté</option>
       </select>
     </div>
+    <fieldset class="filtre-types" id="filtreTypes" style="border:0;padding:0;min-width:0"></fieldset>
     <div id="grille" class="grille"></div>
   </div>
 
@@ -343,6 +362,26 @@ function badge(nom) {
 
 let donnees = null;
 let filtre = 'tous';
+const typesCoches = new Set();   // domaines cochés dans le Dex d'un dresseur (vide = tous)
+const typesDe = n => ((donnees.univers.creatures || []).find(c => c.numero === n) || {}).types || [];
+
+function dessinerFiltreTypes(x) {
+  const couleurs = donnees.univers.domaines || {};
+  const presents = new Set(x.pokemons.flatMap(p => typesDe(p.numero)));
+  const noms = Object.keys(couleurs).filter(t => presents.has(t));
+  $('filtreTypes').classList.toggle('cache', !noms.length);
+  $('filtreTypes').innerHTML = '<legend class="cache">Filtrer par domaine</legend><span>Domaines :</span>' + noms.map(t =>
+    `<label class="case-type" style="--coul:${couleurs[t]}"><input type="checkbox" value="${esc(t)}" ${typesCoches.has(t) ? 'checked' : ''}>` +
+    `<span class="coche" aria-hidden="true"></span>${esc(t)}</label>`).join('') +
+    (typesCoches.size ? '<button type="button" class="effacer-types" id="effacerTypes">Tout décocher</button>' : '');
+  $('filtreTypes').querySelectorAll('input').forEach(i => i.onchange = () => {
+    i.checked ? typesCoches.add(i.value) : typesCoches.delete(i.value);
+    dessinerFiltreTypes(x);
+    dessinerGrille(x);
+  });
+  const eff = $('effacerTypes');
+  if (eff) eff.onclick = () => { typesCoches.clear(); dessinerFiltreTypes(x); dessinerGrille(x); };
+}
 
 function quand(iso) {
   // Heure du dernier changement (capture, combat, don...) et non de la dernière visite du script
@@ -400,6 +439,17 @@ function afficherBestiaire(d) {
   $('bestiaire').querySelectorAll('.bete').forEach(b => b.onclick = () => ouvrirFiche(+b.dataset.n));
 }
 
+const NOMS_STATS = [['pv', 'PV'], ['atk', 'Attaque'], ['def', 'Défense'], ['atkspe', 'Attaque spé.'],
+                    ['defspe', 'Défense spé.'], ['vit', 'Vitesse']];
+function statsHtml(st) {
+  if (!st) return '';
+  const coul = v => v >= 120 ? '#2fe39b' : v >= 90 ? '#9be35a' : v >= 65 ? '#ffcb05' : v >= 45 ? '#ff9a3c' : '#ff5a5a';
+  const total = NOMS_STATS.reduce((s, [k]) => s + (st[k] || 0), 0);
+  return '<div class="fiche-stats">' + NOMS_STATS.map(([k, nom]) =>
+    `<span class="lib">${nom}</span><span class="val">${st[k]}</span>` +
+    `<span class="barre"><i style="width:${Math.min(100, st[k] / 160 * 100)}%;background:${coul(st[k])}"></i></span>`).join('') +
+    `<span class="total">Total des stats de base : <b>${total}</b> · +1 % par niveau, +7 % en shiny</span></div>`;
+}
 function ouvrirFiche(n) {
   const u = donnees.univers, c = u.creatures.find(x => x.numero === n);
   if (!c) return;
@@ -425,7 +475,7 @@ function ouvrirFiche(n) {
       `<div class="infos">Habitat : <b>${esc(c.habitat || '?')}</b><br>Inspiré ${esc(deLegende(c.inspiration))} · ${esc(c.mythologie)}<br>` +
       `Taille ${String(c.taille).replace('.', ',')} m · Poids ${String(c.poids).replace('.', ',')} kg · ${c.legendaire ? 'Légende' : 'Stade ' + c.stade}` +
       (c.decouvert_par ? `<br>📖 Découvert par <b>${esc(c.decouvert_par)}</b>${c.decouvert_le ? ' le ' + date(c.decouvert_le) : ''}` : '') +
-      `</div></div></div>` +
+      `</div></div></div>` + statsHtml(c.stats) +
       (lignee.length > 1 ? '<div class="fiche-lignee">' + lignee.map((x, i) =>
         (i ? `<span>→ niv. ${u.niveaux[i - 1]}</span>` : '') +
         `<button type="button" data-n="${x.numero}" class="${x.numero === n ? 'actuel' : ''}">` +
@@ -500,6 +550,7 @@ function afficherDex(nom) {
   $('outils').classList.toggle('cache', !x.pokemons.length);
   $('partager').classList.remove('cache');
   $('partager').onclick = () => copier(location.href, 'Lien copié !');
+  dessinerFiltreTypes(x);
   dessinerGrille(x);
   $('accueil').classList.add('cache');
   $('vueDex').classList.remove('cache');
@@ -508,7 +559,8 @@ function afficherDex(nom) {
 
 function dessinerGrille(x) {
   const tri = $('tri').value;
-  const liste = x.pokemons.filter(p => filtre === 'tous' || p.type === filtre).sort((a, b) =>
+  const liste = x.pokemons.filter(p => (filtre === 'tous' || p.type === filtre) &&
+      (!typesCoches.size || typesDe(p.numero).some(t => typesCoches.has(t)))).sort((a, b) =>
     tri === 'numero' ? a.numero - b.numero :
     tri === 'nom' ? a.nom.localeCompare(b.nom) :
     tri === 'rarete' ? (RARETE[a.type] ?? 3) - (RARETE[b.type] ?? 3) || b.niveau - a.niveau :
@@ -519,7 +571,7 @@ function dessinerGrille(x) {
       `<span class="niv">N.${p.niveau}</span>` +
       `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
       `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
-  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Nuton de ce type.' : 'Aucun Nuton pour l\'instant.'}</div>`;
+  }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Nuton ne correspond à ces filtres.' : 'Aucun Nuton pour l\'instant.'}</div>`;
   $('grille').querySelectorAll('.carte-poke').forEach(el => el.onclick = () => ouvrirFiche(+el.dataset.n));
 }
 
@@ -542,7 +594,7 @@ function router() {
   const nom = decodeURIComponent(location.hash.slice(1)).trim().replace(/^@/, '');
   if (nom) afficherDex(nom); else afficherAccueil();
 }
-window.addEventListener('hashchange', () => { filtre = 'tous'; document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { filtre = 'tous'; typesCoches.clear(); document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
 $('recherche').onsubmit = e => {
   e.preventDefault();
   const v = $('champ').value.trim().replace(/^@/, '');
