@@ -149,6 +149,18 @@
   .carte-poke.obscur img { filter: drop-shadow(0 0 8px rgba(166, 77, 255, .8)); }
   .carte-poke.baron { border-color: #e5383b; background: linear-gradient(180deg, rgba(193, 18, 31, .3), var(--fond)); }
   .carte-poke.baron img { filter: drop-shadow(0 0 8px rgba(229, 56, 59, .7)); }
+  /* Niveau maximum : cadre doré animé et badge MAX */
+  .carte-poke.max { border-color: transparent; box-shadow: 0 0 16px rgba(255, 203, 5, .35); }
+  .carte-poke.max::before { content: ''; position: absolute; inset: -1px; border-radius: 8px; padding: 2px; pointer-events: none;
+    background: linear-gradient(115deg, #ffcb05, #fff3b0, #ff9f1c, #ffcb05, #fff3b0, #ff9f1c, #ffcb05);
+    background-size: 300% 300%; animation: cadreMax 4s linear infinite;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+  .carte-poke.max .niv { color: #1a1a1a; background: linear-gradient(135deg, #fff3b0, #ffcb05); padding: 1px 6px; border-radius: 4px;
+    top: 5px; right: 6px; letter-spacing: .5px; }
+  .carte-poke.max img { filter: drop-shadow(0 0 8px rgba(255, 203, 5, .55)); }
+  @keyframes cadreMax { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+  @media (prefers-reduced-motion: reduce) { .carte-poke.max::before { animation: none; } }
   .tag.shiny { background: var(--jaune); color: #1a1a1a; }
   .tag.obscur { background: #5b2a86; color: #e6d0ff; }
   .tag.baron { background: #c1121f; color: #fff; }
@@ -865,8 +877,10 @@ function dessinerGrille(x) {
     b.niveau - a.niveau || (RARETE[a.type] ?? 3) - (RARETE[b.type] ?? 3) || a.numero - b.numero);
   $('grille').innerHTML = liste.length ? liste.map(p => {
     const g = p.genre === '♂' ? '<span class="genre m">♂</span>' : p.genre === '♀' ? '<span class="genre f">♀</span>' : '';
-    return `<div class="carte-poke ${p.type}" data-n="${p.numero}" style="cursor:pointer"><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
-      `<span class="niv">N.${p.niveau}</span>` +
+    const max = donnees.niveau_max && p.niveau >= donnees.niveau_max;
+    return `<div class="carte-poke ${p.type} ${max ? 'max' : ''}" data-n="${p.numero}" style="cursor:pointer"` +
+      `${max ? ' title="Niveau maximum atteint !"' : ''}><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
+      `<span class="niv">${max ? '★ MAX' : 'N.' + p.niveau}</span>` +
       `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
       `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
   }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Nuton ne correspond à ces filtres.' : 'Aucun Nuton pour l\'instant.'}</div>`;
