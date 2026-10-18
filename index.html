@@ -27,6 +27,7 @@
   button, input, select { font: inherit; color: inherit; }
   .conteneur { max-width: 1080px; margin: 0 auto; padding: 0 16px 48px; }
   .cache { display: none !important; }
+  .masque-onglet { display: none !important; }
 
   /* ---------- En-tête ---------- */
   header { position: sticky; top: 0; z-index: 5; background: var(--fond); border-bottom: 1px solid var(--bord);
@@ -255,6 +256,34 @@
   .vt.obscur { border-color: var(--violet); } .vt.obscur b { color: var(--violet-clair); }
   .vt.baron { border-color: #e8402a; } .vt.baron b { color: #ff6a50; }
 
+  /* ---------- Onglets du Dex et encyclopédie personnelle ---------- */
+  .onglets { display: flex; gap: 6px; margin: 16px 0 4px; border-bottom: 1px solid var(--bord); }
+  .onglet { padding: 9px 16px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: var(--gris); font-weight: 700;
+    font-size: 15px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .onglet:hover { color: var(--texte); background: var(--fond2); }
+  .onglet[aria-selected="true"] { color: var(--texte); border-bottom-color: var(--violet); }
+  .onglet:focus-visible { outline: 2px solid var(--violet-clair); outline-offset: 2px; }
+  #ongletEncyclo { margin-top: 14px; }
+  .legende-encyclo { font-size: 13px; color: var(--gris); margin: 0 0 12px; line-height: 1.8; }
+  .pastille-etat { display: inline-block; padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; margin-left: 4px; }
+  .pastille-etat.a { background: rgba(0, 245, 147, .15); color: var(--vert); }
+  .pastille-etat.v { background: rgba(145, 70, 255, .18); color: var(--violet-clair); }
+  .pastille-etat.i { background: var(--fond3); color: var(--gris); }
+  .gen-encyclo + .gen-encyclo { margin-top: 18px; }
+  .gen-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-bottom: 8px; }
+  .gen-tete b { font-size: 17px; }
+  .gen-tete span { font-size: 13px; color: var(--gris); }
+  .gen-tete .legende-ok { color: var(--jaune); font-weight: 800; }
+  .barre-gen { height: 8px; border-radius: 4px; background: var(--fond3); overflow: hidden; position: relative; margin-bottom: 10px; }
+  .barre-gen i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+  .barre-gen .vus { background: rgba(145, 70, 255, .45); } .barre-gen .att { background: linear-gradient(90deg, var(--vert), #9be35a); }
+  .bete.perso-a { border-color: rgba(0, 245, 147, .45); }
+  .bete.perso-a::after { content: '✓'; position: absolute; top: 2px; right: 5px; font-size: 12px; font-weight: 900; color: var(--vert); }
+  .bete.perso-v img { filter: grayscale(1) opacity(.55); }
+  .bete.perso-v::after { content: '👀'; position: absolute; top: 2px; right: 4px; font-size: 11px; }
+  .bete.perso-i img { filter: brightness(0) opacity(.45); }
+  .bete.perso-i b { color: var(--gris); }
+
   /* ---------- Succès ---------- */
   #blocSucces { margin-top: 20px; display: grid; gap: 16px; }
   #blocSucces section { margin-top: 0; }
@@ -442,6 +471,20 @@
     </div>
     <div class="stats" id="statsDex"></div>
     <div class="progression" id="progression"></div>
+    <div class="onglets" id="onglets" role="tablist">
+      <button type="button" class="onglet" data-onglet="nutons" role="tab" aria-selected="true">📦 Ses Nutons</button>
+      <button type="button" class="onglet" data-onglet="encyclo" role="tab" aria-selected="false">📖 Son encyclopédie</button>
+    </div>
+    <div id="ongletEncyclo" class="cache">
+      <div class="carte">
+        <div class="tete"><span class="pastille">📖 Encyclopédie</span><b id="titreEncyclo">Encyclopédie personnelle</b><span class="tete-droite" id="compteEncyclo"></span></div>
+        <div class="corps">
+          <p class="legende-encyclo">Chaque Nuton attrapé une fois reste dans l'encyclopédie, même s'il a été donné ou échangé depuis.
+            <span class="pastille-etat a">✓ attrapé</span> <span class="pastille-etat v">👀 vu</span> <span class="pastille-etat i">? pas encore croisé</span></p>
+          <div id="gensEncyclo"></div>
+        </div>
+      </div>
+    </div>
     <div class="outils" id="outils">
       <button class="puce-filtre" data-filtre="tous" aria-pressed="true">Tous</button>
       <button class="puce-filtre" data-filtre="shiny" aria-pressed="false">✨ Shiny</button>
@@ -642,6 +685,46 @@ function ouvrirFiche(n) {
 }
 $('fiche').addEventListener('click', e => { if (e.target === $('fiche')) $('fiche').close(); });
 
+// ---------- Encyclopédie personnelle ----------
+let onglet = 'nutons';
+const ROMAINS = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const genDe = n => n < 100 ? 1 : Math.floor(n / 100) + 1;
+function encycloDe(nom) { return ((donnees || {}).encyclos || {})[cleNom(nom)] || { a: [], v: [], legende: 0 }; }
+
+function afficherEncycloPerso(nom) {
+  const e = encycloDe(nom), att = new Set(e.a), vus = new Set([...e.v, ...e.a]);
+  const crea = donnees.univers.creatures || [];
+  const gens = [...new Set(crea.map(c => genDe(c.numero)))].sort((a, b) => a - b);
+  $('titreEncyclo').textContent = `Encyclopédie de ${nom}`;
+  $('compteEncyclo').textContent = `${att.size} attrapés · ${vus.size} vus / ${crea.length}`;
+  $('gensEncyclo').innerHTML = gens.map(g => {
+    const liste = crea.filter(c => genDe(c.numero) === g);
+    const na = liste.filter(c => att.has(c.numero)).length, nv = liste.filter(c => vus.has(c.numero)).length;
+    const legende = (e.legende || 0) >= g
+      ? `<span class="legende-ok">👑 LÉGENDE VIVANTE ${ROMAINS[g]}</span>`
+      : `<span>Encore ${liste.length - na} à attraper pour devenir Légende vivante ${ROMAINS[g]}</span>`;
+    return `<div class="gen-encyclo"><div class="gen-tete"><b>Génération ${g}</b><span>${na} attrapés · ${nv} vus / ${liste.length}</span>${legende}</div>` +
+      `<div class="barre-gen"><i class="vus" style="width:${100 * nv / liste.length}%"></i><i class="att" style="width:${100 * na / liste.length}%"></i></div>` +
+      `<div class="bestiaire">${liste.map(c => {
+        const etat = att.has(c.numero) ? 'a' : vus.has(c.numero) ? 'v' : 'i';
+        const titre = etat === 'a' ? 'Attrapé' : etat === 'v' ? 'Vu, pas encore attrapé' : 'Pas encore croisé';
+        return `<button class="bete perso-${etat} ${c.legendaire ? 'souverain' : ''}" data-n="${c.numero}" type="button" title="${titre}">` +
+          `<span class="n">#${pad(c.numero)}</span><img src="creatures/${pad(c.numero)}.png" alt="" loading="lazy">` +
+          `<b>${etat === 'i' ? '???' : esc((e.noms || {})[c.numero] || c.nom)}</b></button>`;
+      }).join('')}</div></div>`;
+  }).join('');
+  $('gensEncyclo').querySelectorAll('.bete').forEach(b => b.onclick = () => ouvrirFiche(+b.dataset.n));
+}
+
+function montrerOnglet(nom) {
+  document.querySelectorAll('.onglet').forEach(b => b.setAttribute('aria-selected', b.dataset.onglet === onglet));
+  const enc = onglet === 'encyclo';
+  $('ongletEncyclo').classList.toggle('cache', !enc);
+  ['outils', 'filtreTypes', 'grille', 'blocSucces'].forEach(id => $(id).classList.toggle('masque-onglet', enc));
+  if (enc) afficherEncycloPerso(nom);
+}
+document.querySelectorAll('.onglet').forEach(b => b.onclick = () => { onglet = b.dataset.onglet; router(); });
+
 // ---------- Succès et effets ----------
 const ICONES_FX = { eclairs: '⚡', aura: '◎', feuilles: '🍃', confettis: '🎊', flammes: '🔥', bulles: '🫧', spirale: '🌀',
                     onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★' };
@@ -718,7 +801,15 @@ function afficherSucces(nom, pokemons) {
       }).join('') + '</ul>' +
       `<div class="effet">${ICONES_FX[f.fx] || ''} Effet <b>${esc(f.fx_nom)}</b> · ${r ? [0, 1, 4, 8][r] + ' couleur' + (r > 1 ? 's' : '') : 'verrouillé'}</div></div>`;
   };
-  $('grilleSucces').innerHTML = S.familles.map(tuile).join('') + (js.originel
+  const enc = encycloDe(nom), g1 = (donnees.univers.creatures || []).filter(c => c.numero < 100).length || 99;
+  const na1 = (enc.a || []).filter(n => n < 100).length;
+  const tuileLegende = (enc.legende || 0) >= 1
+    ? `<div class="succes originel r3"><div class="haut"><b>👑 Légende vivante ${ROMAINS[enc.legende]}</b></div>` +
+      `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Attraper les ${g1} Nutons de la génération 1</span><span></span></li></ul></div>`
+    : `<div class="succes"><div class="haut"><b>👑 Légende vivante</b></div><ul class="objectifs"><li><span class="c">○</span>` +
+      `<span>Attraper les ${g1} Nutons de la génération 1</span><small>${na1}/${g1}</small><div class="mini-barre"><div style="width:${100 * na1 / g1}%"></div></div></li></ul>` +
+      `<div class="effet">Voir l'onglet « Son encyclopédie »</div></div>`;
+  $('grilleSucces').innerHTML = S.familles.map(tuile).join('') + tuileLegende + (js.originel
     ? `<div class="succes originel r3"><div class="haut"><b>🌟 ${esc(S.originel.nom)}</b></div>` +
       `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Plus grand explorateur de l'encyclopédie complète</span><span></span></li></ul>` +
       `<div class="effet">★ Effet <b>${esc(S.originel.fx_nom)}</b> · 8 couleurs</div></div>`
@@ -839,6 +930,9 @@ function afficherDex(nom) {
     $('grille').innerHTML = `<div class="vide" style="grid-column:1/-1">${js ? 'Aucun Nuton pour l\'instant.' : 'Aucun dresseur à ce nom pour l\'instant.'} ` +
       `Capture ton premier Nuton en live (une Lampe avec les points de chaîne, ou un Nuton sauvage) !</div>`;
     if (js) afficherSucces(js.nom, []); else $('blocSucces').classList.add('cache');
+    const enc = (donnees.encyclos || {})[cleNom(nom)];
+    $('onglets').classList.toggle('cache', !enc);
+    if (enc) montrerOnglet(enc.nom); else { $('ongletEncyclo').classList.add('cache'); }
     return;
   }
   const especes = new Set(x.pokemons.map(p => p.numero)).size;
@@ -850,6 +944,7 @@ function afficherDex(nom) {
     (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
     (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '') +
+    ((encycloDe(x.nom).legende || 0) ? `<div style="color:var(--jaune);font-weight:800">👑 Légende vivante ${ROMAINS[encycloDe(x.nom).legende]}</div>` : '') +
     (donnees.succes ? `<div><a href="javascript:void 0" id="versSucces" style="text-decoration:none">🏆 Succès et effets ↓</a></div>` : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
@@ -860,6 +955,8 @@ function afficherDex(nom) {
   dessinerFiltreTypes(x);
   dessinerGrille(x);
   afficherSucces(x.nom, x.pokemons);
+  $('onglets').classList.remove('cache');
+  montrerOnglet(x.nom);
   const vs = $('versSucces');
   if (vs) vs.onclick = () => $('blocSucces').scrollIntoView({ behavior: 'smooth' });
   $('accueil').classList.add('cache');
@@ -880,7 +977,7 @@ function dessinerGrille(x) {
     const max = donnees.niveau_max && p.niveau >= donnees.niveau_max;
     return `<div class="carte-poke ${p.type} ${max ? 'max' : ''}" data-n="${p.numero}" style="cursor:pointer"` +
       `${max ? ' title="Niveau maximum atteint !"' : ''}><span class="num">#${String(p.numero).padStart(3, '0')}</span>` +
-      `<span class="niv">${max ? '★ MAX' : 'N.' + p.niveau}</span>` +
+      `<span class="niv"${p.fige ? ' title="Retour dans le temps (!rollback) : il n\'évolue plus tout seul"' : ''}>${max ? '★ MAX' : 'N.' + p.niveau}${p.fige ? ' ⏳' : ''}</span>` +
       `<img src="${sprite(p.numero, p.type)}" ${secours(p.numero)} alt="" loading="lazy">` +
       `<b>${esc(p.nom)}${g}</b>` + (p.type !== 'normal' ? `<span class="tag ${p.type}">${p.type}</span>` : '') + '</div>';
   }).join('') : `<div class="vide" style="grid-column:1/-1">${x.pokemons.length ? 'Aucun Nuton ne correspond à ces filtres.' : 'Aucun Nuton pour l\'instant.'}</div>`;
@@ -906,7 +1003,7 @@ function router() {
   const nom = decodeURIComponent(location.hash.slice(1)).trim().replace(/^@/, '');
   if (nom) afficherDex(nom); else afficherAccueil();
 }
-window.addEventListener('hashchange', () => { filtre = 'tous'; choixFx = null; dernierAtelier = ''; typesCoches.clear(); document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { filtre = 'tous'; choixFx = null; dernierAtelier = ''; onglet = 'nutons'; typesCoches.clear(); document.querySelectorAll('.puce-filtre').forEach(o => o.setAttribute('aria-pressed', o.dataset.filtre === 'tous')); router(); window.scrollTo(0, 0); });
 $('recherche').onsubmit = e => {
   e.preventDefault();
   const v = $('champ').value.trim().replace(/^@/, '');
