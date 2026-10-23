@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nutons — le Dex de la chaîne</title>
-<meta name="description" content="Le bestiaire des 99 Nutons et tous les Dex des dresseurs du stream.">
+<meta name="description" content="Le bestiaire des Nutons et tous les Dex des dresseurs du stream.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23fff' stroke='%23222' stroke-width='8'/><path d='M4 50a46 46 0 0 1 92 0z' fill='%23e3350d' stroke='%23222' stroke-width='8'/><circle cx='50' cy='50' r='13' fill='%23fff' stroke='%23222' stroke-width='8'/></svg>">
 <!--
   Page publiée sur GitHub Pages par capture_pokemon.py, avec le fichier donnees.json.
@@ -431,7 +431,7 @@
       <div class="corps"><div id="dernieres" class="defile"></div></div>
     </section>
     <section class="carte">
-      <div class="tete"><span class="pastille">📜 Bestiaire</span><b>Les 99 Nutons</b><span class="tete-droite" id="nbDecouverts"></span></div>
+      <div class="tete"><span class="pastille">📜 Bestiaire</span><b id="titreBestiaire">Les Nutons</b><span class="tete-droite" id="nbDecouverts"></span></div>
       <div class="corps">
         <div class="progression" id="progBestiaire"></div>
         <div id="bestiaire" class="bestiaire"></div>
@@ -625,6 +625,7 @@ function afficherBestiaire(d) {
   const nbVus = u.creatures.filter(c => etat(c) !== 'inconnu').length;
   const total = u.creatures.length;
   $('nbDecouverts').textContent = `${nbDec} découverts · ${nbVus} aperçus / ${total}`;
+  $('titreBestiaire').textContent = `Les ${total} Nutons`;
   $('progBestiaire').innerHTML = `<div class="barre double"><div class="vus" style="width:${100 * nbVus / total}%"></div>` +
     `<div style="width:${100 * nbDec / total}%"></div></div>` +
     `<small>👀 <b>Aperçu</b> : il est apparu en live (sauvage, combat, mini-jeu). 📖 <b>Découvert</b> : quelqu'un l'a capturé, sa page s'écrit ` +
@@ -689,7 +690,8 @@ $('fiche').addEventListener('click', e => { if (e.target === $('fiche')) $('fich
 let onglet = 'nutons';
 const ROMAINS = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 const genDe = n => n < 100 ? 1 : Math.floor(n / 100) + 1;
-function encycloDe(nom) { return ((donnees || {}).encyclos || {})[cleNom(nom)] || { a: [], v: [], legende: 0 }; }
+function encycloDe(nom) { return ((donnees || {}).encyclos || {})[cleNom(nom)] || { a: [], v: [], legendes: [] }; }
+const legendesDe = e => e.legendes || (e.legende ? Array.from({ length: e.legende }, (_, i) => i + 1) : []);
 
 function afficherEncycloPerso(nom) {
   const e = encycloDe(nom), att = new Set(e.a), vus = new Set([...e.v, ...e.a]);
@@ -700,7 +702,7 @@ function afficherEncycloPerso(nom) {
   $('gensEncyclo').innerHTML = gens.map(g => {
     const liste = crea.filter(c => genDe(c.numero) === g);
     const na = liste.filter(c => att.has(c.numero)).length, nv = liste.filter(c => vus.has(c.numero)).length;
-    const legende = (e.legende || 0) >= g
+    const legende = legendesDe(e).includes(g)
       ? `<span class="legende-ok">👑 LÉGENDE VIVANTE ${ROMAINS[g]}</span>`
       : `<span>Encore ${liste.length - na} à attraper pour devenir Légende vivante ${ROMAINS[g]}</span>`;
     return `<div class="gen-encyclo"><div class="gen-tete"><b>Génération ${g}</b><span>${na} attrapés · ${nv} vus / ${liste.length}</span>${legende}</div>` +
@@ -747,7 +749,7 @@ function catalogueFx(js) {
                rangPour: c => { const i = ordre.indexOf(c); return i === 0 ? 1 : i < 4 ? 2 : 3; },
                ok: c => rang >= (ordre.indexOf(c) === 0 ? 1 : ordre.indexOf(c) < 4 ? 2 : 3) });
   }
-  if (js.originel) res.push({ type: S.originel.fx, nom: S.originel.fx_nom, famille: null, couleurs: [...S.ordre], rangPour: () => 1, ok: () => true });
+  if (js.originel || (js.originels || []).length) res.push({ type: S.originel.fx, nom: S.originel.fx_nom, famille: null, couleurs: [...S.ordre], rangPour: () => 1, ok: () => true });
   return res;
 }
 
@@ -801,17 +803,21 @@ function afficherSucces(nom, pokemons) {
       }).join('') + '</ul>' +
       `<div class="effet">${ICONES_FX[f.fx] || ''} Effet <b>${esc(f.fx_nom)}</b> · ${r ? [0, 1, 4, 8][r] + ' couleur' + (r > 1 ? 's' : '') : 'verrouillé'}</div></div>`;
   };
-  const enc = encycloDe(nom), g1 = (donnees.univers.creatures || []).filter(c => c.numero < 100).length || 99;
-  const na1 = (enc.a || []).filter(n => n < 100).length;
-  const tuileLegende = (enc.legende || 0) >= 1
-    ? `<div class="succes originel r3"><div class="haut"><b>👑 Légende vivante ${ROMAINS[enc.legende]}</b></div>` +
-      `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Attraper les ${g1} Nutons de la génération 1</span><span></span></li></ul></div>`
-    : `<div class="succes"><div class="haut"><b>👑 Légende vivante</b></div><ul class="objectifs"><li><span class="c">○</span>` +
-      `<span>Attraper les ${g1} Nutons de la génération 1</span><small>${na1}/${g1}</small><div class="mini-barre"><div style="width:${100 * na1 / g1}%"></div></div></li></ul>` +
-      `<div class="effet">Voir l'onglet « Son encyclopédie »</div></div>`;
-  $('grilleSucces').innerHTML = S.familles.map(tuile).join('') + tuileLegende + (js.originel
-    ? `<div class="succes originel r3"><div class="haut"><b>🌟 ${esc(S.originel.nom)}</b></div>` +
-      `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Plus grand explorateur de l'encyclopédie complète</span><span></span></li></ul>` +
+  const enc = encycloDe(nom), crea = donnees.univers.creatures || [], leg = legendesDe(enc);
+  const gensU = [...new Set(crea.map(c => genDe(c.numero)))].sort((a, b) => a - b);
+  const tuileLegende = gensU.map(g => {
+    const tot = crea.filter(c => genDe(c.numero) === g).length, na = (enc.a || []).filter(n => genDe(n) === g).length;
+    return leg.includes(g)
+      ? `<div class="succes originel r3"><div class="haut"><b>👑 Légende vivante ${ROMAINS[g]}</b></div>` +
+        `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Attraper les ${tot} Nutons de la génération ${g}</span><span></span></li></ul></div>`
+      : `<div class="succes"><div class="haut"><b>👑 Légende vivante ${ROMAINS[g]}</b></div><ul class="objectifs"><li><span class="c">○</span>` +
+        `<span>Attraper les ${tot} Nutons de la génération ${g}</span><small>${na}/${tot}</small><div class="mini-barre"><div style="width:${100 * na / tot}%"></div></div></li></ul>` +
+        `<div class="effet">Voir l'onglet « Son encyclopédie »</div></div>`;
+  }).join('');
+  const origs = js.originels || (js.originel ? [1] : []);
+  $('grilleSucces').innerHTML = S.familles.map(tuile).join('') + tuileLegende + (origs.length
+    ? `<div class="succes originel r3"><div class="haut"><b>🌟 ${esc(S.originel.nom)} ${origs.map(g => ROMAINS[g]).join(' · ')}</b></div>` +
+      `<ul class="objectifs"><li class="ok"><span class="c">✓</span><span>Plus grand explorateur de la génération ${origs.join(', ')} complétée</span><span></span></li></ul>` +
       `<div class="effet">★ Effet <b>${esc(S.originel.fx_nom)}</b> · 8 couleurs</div></div>`
     : `<div class="succes cache-succes"><div><b style="font-size:22px">???</b><br>Succès caché</div></div>`);
 
@@ -872,9 +878,19 @@ function afficherEncyclo(d) {
     `<div class="gros">${E.decouverts}<span> / ${E.total} espèces capturées par la communauté</span></div>` +
     `<div class="progression" style="margin-top:10px"><div class="barre double"><div class="vus" style="width:${100 * E.vus / E.total}%"></div>` +
     `<div style="width:${100 * E.decouverts / E.total}%"></div></div><small>${E.vus} espèces aperçues en live. Chaque première capture écrit une page de l'encyclopédie.</small></div>` +
-    `<div class="secret">${ori.titulaire
+    `<div class="secret">${ori.titulaire && (E.generations || []).length <= 1
       ? `🌟 <b>${esc(ori.nom)}</b> : <a href="#${encodeURIComponent(ori.titulaire)}">${esc(ori.titulaire)}</a>`
-      : `🔒 Quand l'encyclopédie sera complète, l'explorateur qui a le plus contribué recevra un succès caché…`}</div></div>` +
+      : (E.generations || []).length > 1 ? `🌟 Chaque génération complétée couronne son meilleur explorateur (${esc(ori.nom)}).`
+      : `🔒 Quand l'encyclopédie sera complète, l'explorateur qui a le plus contribué recevra un succès caché…`}</div>` +
+    ((E.generations || []).length > 1 ? (E.generations).map(g =>
+      `<div class="progression" style="margin-top:8px"><small><b>Génération ${ROMAINS[g.gen]}</b> : ${g.decouverts} / ${g.total}` +
+      (g.originel ? ` · 🌟 <a href="#${encodeURIComponent(g.originel)}">${esc(g.originel)}</a>` : ' · 🔒') + `</small>` +
+      `<div class="barre"><div style="width:${100 * g.decouverts / g.total}%"></div></div></div>`).join('') : '') +
+    (E.objectif ? `<div class="secret" style="margin-top:10px">🌫️ ${E.objectif.atteint
+      ? `Objectif atteint : la <b>génération ${E.objectif.romain}</b> va bientôt sortir de la brume !`
+      : `Prochaine génération : la communauté doit découvrir <b>${E.objectif.seuil} %</b> de la génération ${ROMAINS[E.objectif.gen]} ` +
+        `(${E.objectif.decouverts} / ${E.objectif.besoin}), encore <b>${E.objectif.reste}</b> espèce${E.objectif.reste > 1 ? 's' : ''} à trouver.`}` +
+      `<div class="barre" style="margin-top:6px"><div style="width:${Math.min(100, 100 * E.objectif.decouverts / E.objectif.besoin)}%"></div></div></div>` : '') + `</div>` +
     `<div><b style="font-size:14px">Les plus grands explorateurs</b><ol style="margin-top:8px">${E.top.length
       ? E.top.map(t => `<li><a href="#${encodeURIComponent(t.nom)}">${esc(t.nom)}</a><span>${t.n} espèce${t.n > 1 ? 's' : ''}</span></li>`).join('')
       : '<div class="vide">Personne n\'a encore découvert d\'espèce.</div>'}</ol></div></div>`;
@@ -944,7 +960,7 @@ function afficherDex(nom) {
     (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
     (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '') +
-    ((encycloDe(x.nom).legende || 0) ? `<div style="color:var(--jaune);font-weight:800">👑 Légende vivante ${ROMAINS[encycloDe(x.nom).legende]}</div>` : '') +
+    (legendesDe(encycloDe(x.nom)).length ? `<div style="color:var(--jaune);font-weight:800">👑 Légende vivante ${legendesDe(encycloDe(x.nom)).map(g => ROMAINS[g]).join(' · ')}</div>` : '') +
     (donnees.succes ? `<div><a href="javascript:void 0" id="versSucces" style="text-decoration:none">🏆 Succès et effets ↓</a></div>` : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
