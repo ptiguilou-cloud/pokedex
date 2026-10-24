@@ -877,7 +877,7 @@ function afficherEncyclo(d) {
   $('encyclo').innerHTML = `<div class="encyclo"><div>` +
     `<div class="gros">${E.decouverts}<span> / ${E.total} espèces capturées par la communauté</span></div>` +
     `<div class="progression" style="margin-top:10px"><div class="barre double"><div class="vus" style="width:${100 * E.vus / E.total}%"></div>` +
-    `<div style="width:${100 * E.decouverts / E.total}%"></div></div><small>${E.vus} espèces aperçues en live. Chaque première capture écrit une page de l'encyclopédie.</small></div>` +
+    `<div style="width:${100 * E.decouverts / E.total}%"></div></div><small>${E.vus} espèces déjà croisées en live, dont ${Math.max(0, E.vus - E.decouverts)} pas encore capturées. Chaque première capture écrit une page de l'encyclopédie.</small></div>` +
     `<div class="secret">${ori.titulaire && (E.generations || []).length <= 1
       ? `🌟 <b>${esc(ori.nom)}</b> : <a href="#${encodeURIComponent(ori.titulaire)}">${esc(ori.titulaire)}</a>`
       : (E.generations || []).length > 1 ? `🌟 Chaque génération complétée couronne son meilleur explorateur (${esc(ori.nom)}).`
