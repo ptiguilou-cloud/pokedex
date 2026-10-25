@@ -397,6 +397,16 @@
   @keyframes fxTourne { 0% { transform: rotate(0) scale(.6); opacity: 0; } 20% { opacity: .85; } 80% { opacity: .85; } 100% { transform: rotate(160deg) scale(1.15); opacity: 0; } }
   @keyframes fxEtoile { 0% { transform: scale(0) rotate(-200deg); opacity: 0; } 35% { transform: scale(1.1) rotate(0); opacity: 1; }
     75% { transform: scale(1) rotate(10deg); opacity: 1; } 100% { transform: scale(1.3) rotate(20deg); opacity: 0; } }
+  .artefacts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+  @media (max-width: 640px) { .artefacts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .artefact { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 10px; background: var(--fond2);
+    text-align: center; border: 1px solid var(--bord); }
+  .artefact b { font-size: 13px; line-height: 1.2; }
+  .artefact small { font-size: 11px; color: var(--gris); }
+  .artefact.manque svg { filter: grayscale(1) brightness(.35); opacity: .6; }
+  .artefact.manque b { color: var(--gris); }
+  .nb-artefacts { margin-top: 12px; font-size: 14px; color: var(--gris); }
+  .nb-artefacts .or { color: var(--jaune); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -476,6 +486,15 @@
       <button type="button" class="onglet" data-onglet="encyclo" role="tab" aria-selected="false">📖 Son encyclopédie</button>
     </div>
     <div id="ongletEncyclo" class="cache">
+      <div class="carte cache" id="blocArtefacts" style="margin-bottom:16px">
+        <div class="tete"><span class="pastille">🚂 Marché</span><b id="titreArtefacts">Artefacts du Nord</b><span class="tete-droite" id="compteArtefacts"></span></div>
+        <div class="corps">
+          <p class="legende-encyclo">Rapportés du marché par le P'tit Train (événement « Le Marché »). Les doubles sont revendus à chaque marché ;
+            les 10 réunis partent au marché dans un wagon doré, avec un bénéfice ×2.</p>
+          <div class="artefacts" id="grilleArtefacts"></div>
+          <div class="nb-artefacts" id="bilanArtefacts"></div>
+        </div>
+      </div>
       <div class="carte">
         <div class="tete"><span class="pastille">📖 Encyclopédie</span><b id="titreEncyclo">Encyclopédie personnelle</b><span class="tete-droite" id="compteEncyclo"></span></div>
         <div class="corps">
@@ -693,7 +712,52 @@ const genDe = n => n < 100 ? 1 : Math.floor(n / 100) + 1;
 function encycloDe(nom) { return ((donnees || {}).encyclos || {})[cleNom(nom)] || { a: [], v: [], legendes: [] }; }
 const legendesDe = e => e.legendes || (e.legende ? Array.from({ length: e.legende }, (_, i) => i + 1) : []);
 
+// Les 10 artefacts du Nord (dessins plats, identiques dans l'overlay et sur le Dex en ligne)
+const ART_SVG = {
+  frites: '<path d="M11 15 L14 4 L16 15 Z M15 15 L19 2 L21 15 Z M20 15 L25 3 L26 15 Z M24 15 L29 6 L29 15 Z" fill="#ffd34d" stroke="#e0a400" stroke-width="1"/>' +
+    '<path d="M8 14 L32 14 L27 37 L13 37 Z" fill="#e8463c"/><path d="M8 14 L32 14 L31 18 L9 18 Z" fill="#c8302a"/><circle cx="20" cy="27" r="4" fill="#fff" opacity=".9"/>',
+  hareng: '<path d="M4 20 Q16 8 30 18 L37 12 L35 20 L37 28 L30 22 Q16 32 4 20 Z" fill="#8fa3b8"/><path d="M6 20 Q16 26 30 21 Q16 30 6 20 Z" fill="#d9b06a"/>' +
+    '<circle cx="10" cy="18" r="2" fill="#1d1d24"/><path d="M14 14 q2 6 0 12" stroke="#6d8196" stroke-width="1.4" fill="none"/>',
+  chicons: '<path d="M20 4 Q30 14 26 34 Q20 38 14 34 Q10 14 20 4 Z" fill="#f4f1d8"/><path d="M20 4 Q24 12 21 34" stroke="#d9d3a8" stroke-width="1.6" fill="none"/>' +
+    '<path d="M20 4 Q15 10 15 18 Q18 10 20 4 Z M20 4 Q25 10 25 18 Q22 10 20 4 Z" fill="#e6e08a"/><path d="M14 34 Q20 38 26 34 L25 37 Q20 40 15 37 Z" fill="#d8cfa0"/>',
+  betises: '<path d="M7 13 L33 13 L33 27 L7 27 Z" fill="#bfe8dc"/><path d="M7 13 L2 9 L4 20 L2 31 L7 27 Z M33 13 L38 9 L36 20 L38 31 L33 27 Z" fill="#9ed6c4"/>' +
+    '<path d="M14 13 L18 13 L13 27 L9 27 Z M24 13 L28 13 L23 27 L19 27 Z" fill="#f4d23c"/>',
+  maroilles: '<path d="M6 16 L20 9 L34 16 L34 30 L20 37 L6 30 Z" fill="#e88a2e"/><path d="M6 16 L20 9 L34 16 L20 23 Z" fill="#f2a34a"/>' +
+    '<path d="M20 23 L34 16 L34 30 L20 37 Z" fill="#fbe7b0"/><path d="M11 6 q-3 -3 0 -5 M17 5 q-3 -3 0 -5 M28 7 q-3 -3 0 -5" stroke="#7bc96f" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+  bistouille: '<ellipse cx="20" cy="34" rx="15" ry="3.5" fill="#e9e4dc"/><path d="M9 16 L31 16 L28 33 L12 33 Z" fill="#fff"/><ellipse cx="20" cy="16" rx="11" ry="3" fill="#6b3a1e"/>' +
+    '<path d="M31 19 q6 1 4 7 q-2 4 -6 3" stroke="#fff" stroke-width="2.6" fill="none"/><path d="M15 10 q-2 -3 0 -6 M21 10 q-2 -3 0 -6 M27 10 q-2 -3 0 -6" stroke="#cfcfd6" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  pave: '<path d="M5 17 L22 10 L36 15 L19 22 Z" fill="#b8b4ac"/><path d="M5 17 L19 22 L19 34 L5 29 Z" fill="#8c877e"/><path d="M19 22 L36 15 L36 27 L19 34 Z" fill="#a39e95"/>' +
+    '<path d="M10 15 l4 2 M24 14 l3 1" stroke="#7a756d" stroke-width="1.2"/>',
+  moules: '<ellipse cx="20" cy="31" rx="17" ry="6" fill="#6f7680"/><path d="M3 27 L37 27 L35 33 Q20 38 5 33 Z" fill="#8b929c"/>' +
+    '<path d="M9 27 Q8 14 14 12 Q18 18 16 27 Z" fill="#26324a"/><path d="M17 27 Q18 10 24 9 Q27 17 23 27 Z" fill="#2f3d5a"/><path d="M24 27 Q27 15 32 15 Q33 22 30 27 Z" fill="#26324a"/>' +
+    '<path d="M11 26 q1 -6 3 -11 M20 26 q1 -8 3 -14" stroke="#ff9e5e" stroke-width="2" fill="none"/>',
+  cloche: '<path d="M20 4 Q31 6 31 22 L34 30 L6 30 L9 22 Q9 6 20 4 Z" fill="#f2c335"/><path d="M20 4 Q12 7 12 22 L10 30 L6 30 L9 22 Q9 6 20 4 Z" fill="#ffd96a"/>' +
+    '<rect x="5" y="29" width="30" height="4" rx="2" fill="#c99a14"/><circle cx="20" cy="36" r="3.4" fill="#a87c0c"/><rect x="18" y="1" width="4" height="5" rx="1.5" fill="#a87c0c"/>',
+  chapeau: '<ellipse cx="20" cy="31" rx="17" ry="5" fill="#26262e"/><path d="M10 31 L12 12 Q20 8 28 12 L30 31 Z" fill="#33333d"/><path d="M11 25 L29 25 L30 30 L10 30 Z" fill="#e0453a"/>' +
+    '<path d="M27 12 Q34 2 38 6 Q32 6 29 14 Z" fill="#ffcb05"/><path d="M28 13 Q36 -1 37 9" stroke="#fff" stroke-width="1.6" fill="none"/>',
+};
+const artSvg = (cle, taille = 28) => `<svg class="art-svg" viewBox="0 0 40 40" width="${taille}" height="${taille}" aria-hidden="true">${ART_SVG[cle] || ''}</svg>`;
+
+function afficherArtefacts(nom) {
+  const M = donnees.marche, bloc = $('blocArtefacts');
+  const m = M && (M.joueurs || {})[cleNom(nom)];
+  if (!M || !m) { bloc.classList.add('cache'); return; }
+  bloc.classList.remove('cache');
+  const n = M.artefacts.filter(a => m.objets[a.cle]).length;
+  $('titreArtefacts').textContent = `Artefacts du Nord de ${nom}`;
+  $('compteArtefacts').textContent = `${n} / ${M.artefacts.length}`;
+  $('grilleArtefacts').innerHTML = M.artefacts.map(a => {
+    const q = m.objets[a.cle] || 0;
+    return `<div class="artefact ${q ? 'ok' : 'manque'}" title="${esc(a.nom)} : ${Math.round(a.chance * 100)} % de chances à chaque marché · ${a.valeur} liards">` +
+      `${artSvg(a.cle, 52)}<b>${q ? esc(a.nom) : '???'}</b><small>${q ? (q > 1 ? `×${q} (le double sera revendu)` : 'possédé') : `${Math.round(a.chance * 100)} % · ${a.valeur} liards`}</small></div>`;
+  }).join('');
+  $('bilanArtefacts').innerHTML = `🚂 ${m.voyages} voyage${m.voyages > 1 ? 's' : ''} au marché · 💰 ${m.liards} liards gagnés` +
+    (m.collections ? ` · <span class="or">🏆 ${m.collections} collection${m.collections > 1 ? 's' : ''} complète${m.collections > 1 ? 's' : ''} vendue${m.collections > 1 ? 's' : ''}</span>` : '') +
+    (n === M.artefacts.length ? ' · <span class="or">Collection complète : wagon doré au prochain marché !</span>' : '');
+}
+
 function afficherEncycloPerso(nom) {
+  afficherArtefacts(nom);
   const e = encycloDe(nom), att = new Set(e.a), vus = new Set([...e.v, ...e.a]);
   const crea = donnees.univers.creatures || [];
   const gens = [...new Set(crea.map(c => genDe(c.numero)))].sort((a, b) => a - b);
@@ -961,6 +1025,7 @@ function afficherDex(nom) {
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
     (x.champion ? '<div class="or">👑 Champion de l\'Arène</div>' : '') +
     (legendesDe(encycloDe(x.nom)).length ? `<div style="color:var(--jaune);font-weight:800">👑 Légende vivante ${legendesDe(encycloDe(x.nom)).map(g => ROMAINS[g]).join(' · ')}</div>` : '') +
+    (((donnees.marche || {}).joueurs || {})[cleNom(x.nom)] ? `<div>🚂 ${donnees.marche.artefacts.filter(a => donnees.marche.joueurs[cleNom(x.nom)].objets[a.cle]).length}/10 artefacts</div>` : '') +
     (donnees.succes ? `<div><a href="javascript:void 0" id="versSucces" style="text-decoration:none">🏆 Succès et effets ↓</a></div>` : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
   $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
