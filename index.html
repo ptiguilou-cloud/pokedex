@@ -147,9 +147,9 @@
   .carte-poke.shiny { border-color: var(--jaune); }
   .carte-poke.shiny img { filter: drop-shadow(0 0 8px rgba(255, 230, 109, .7)); }
   .carte-poke.obscur { border-color: #a64dff; background: linear-gradient(180deg, rgba(91, 42, 134, .4), var(--fond)); }
-  .carte-poke.obscur img { filter: drop-shadow(0 0 8px rgba(166, 77, 255, .8)); }
+  .carte-poke.obscur img { filter: none; }   /* le halo est dans le dessin obscur */
   .carte-poke.baron { border-color: #e5383b; background: linear-gradient(180deg, rgba(193, 18, 31, .3), var(--fond)); }
-  .carte-poke.baron img { filter: drop-shadow(0 0 8px rgba(229, 56, 59, .7)); }
+  .carte-poke.baron img { filter: none; }
   /* Niveau maximum : cadre doré animé et badge MAX */
   .carte-poke.max { border-color: transparent; box-shadow: 0 0 16px rgba(255, 203, 5, .35); }
   .carte-poke.max::before { content: ''; position: absolute; inset: -1px; border-radius: 8px; padding: 2px; pointer-events: none;
@@ -371,6 +371,9 @@
   .fx-confetti { left: 50%; top: 50%; width: 7px; height: 12px; background: var(--fx); opacity: 0; animation: fxEclate 1.5s ease-out forwards; }
   .fx-flamme { bottom: 22%; width: var(--t); height: calc(var(--t) * 1.6); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
     background: radial-gradient(circle at 50% 70%, #fff, var(--fx) 60%); opacity: 0; animation: fxMonte 1.2s ease-out forwards; }
+  .fx-brume { bottom: 8%; width: var(--t); height: var(--t); border-radius: 50%; background: radial-gradient(circle, var(--fx), transparent 70%);
+    opacity: 0; filter: blur(2px); animation: fxBrume 2.2s ease-out forwards; }
+  @keyframes fxBrume { 0% { opacity: 0; transform: translateY(0) scale(.6); } 30% { opacity: .85; } 100% { opacity: 0; transform: translateY(-90px) scale(1.7); } }
   .fx-bulle { bottom: 18%; width: var(--t); height: var(--t); border-radius: 50%; border: 2px solid var(--fx);
     box-shadow: inset -2px -2px 0 rgba(255, 255, 255, .5); opacity: 0; animation: fxMonte 1.9s ease-out forwards; }
   .fx-point { left: 50%; top: 50%; width: 9px; height: 9px; margin: -4px; border-radius: 50%; background: var(--fx);
@@ -557,7 +560,7 @@ const deLegende = s => /^les /i.test(s) ? 'des ' + s.slice(4) : /^le /i.test(s) 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(3, '0');
-const sprite = (n, type) => `creatures/${type === 'shiny' ? 'shiny/' : ''}${pad(n)}.png`;
+const sprite = (n, type) => `creatures/${({ shiny: 'shiny/', obscur: 'obscur/', baron: 'baron/' })[type] || ''}${pad(n)}.png`;
 // si l'image shiny n'existe pas, on prend l'image normale
 const secours = n => `onerror="this.onerror=null;this.src='creatures/${pad(n)}.png'"`;
 const RARETE = { shiny: 0, baron: 1, obscur: 2, normal: 3 };
@@ -793,7 +796,7 @@ document.querySelectorAll('.onglet').forEach(b => b.onclick = () => { onglet = b
 
 // ---------- Succès et effets ----------
 const ICONES_FX = { eclairs: '⚡', aura: '◎', feuilles: '🍃', confettis: '🎊', flammes: '🔥', bulles: '🫧', spirale: '🌀',
-                    onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★' };
+                    onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★', brume: '🌫️' };
 const CHIFFRES = ['', 'I', 'II', 'III'];
 const COUL_RANG = ['', '#d89a64', '#dfe4ec', '#ffcb05'];
 const majuscule = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -835,6 +838,7 @@ function lancerFx(zone, type, coul) {
       s.style.filter = `hue-rotate(${H(-45, 45)}deg)`; }); break;
     case 'flammes': P('fx-flamme', 16, s => { s.style.left = H(10, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; s.style.setProperty('--t', H(12, 24) + 'px'); }); break;
     case 'bulles': P('fx-bulle', 14, s => { s.style.left = H(5, 90) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; s.style.setProperty('--t', H(8, 20) + 'px'); }); break;
+    case 'brume': P('fx-brume', 12, s => { s.style.left = H(0, 78) + '%'; s.style.animationDelay = H(0, 1.4) + 's'; s.style.setProperty('--t', H(26, 46) + 'px'); }); break;
     case 'spirale': P('fx-point', 12, (s, i) => { s.style.setProperty('--a', i * 30 + 'deg'); s.style.animationDelay = i * .07 + 's'; }); break;
     case 'notes': P('fx-glyphe', 12, (s, i) => { s.textContent = i % 2 ? '♪' : '♫'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
     case 'coeurs': P('fx-glyphe', 12, s => { s.textContent = '♥'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
