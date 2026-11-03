@@ -86,6 +86,31 @@
   .ligne small { display: block; color: var(--gris); font-size: 12px; }
   .ligne .score { text-align: right; font-weight: 700; }
 
+  .voir-tout { margin-top: 10px; width: 100%; padding: 9px; border-radius: 6px; border: 1px dashed var(--bord); background: none; color: var(--violet-clair);
+    font: inherit; font-weight: 700; cursor: pointer; }
+  .voir-tout:hover { background: var(--fond2); }
+  .ligne.moi { border-color: var(--jaune); }
+
+  /* Guide pour débuter */
+  .guides { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .guide { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 10px; background: var(--fond2); border: 1px solid var(--bord);
+    cursor: pointer; text-align: left; color: inherit; font: inherit; transition: transform .15s, border-color .15s; }
+  .guide:hover { transform: translateY(-2px); border-color: var(--violet); }
+  .guide img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; border-radius: 6px; background: #111; }
+  .guide b { font-size: 14px; }
+  .visionneuse { position: fixed; inset: 0; z-index: 50; background: rgba(8, 8, 12, .92); display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 10px; padding: 12px; }
+  .visionneuse.cache { display: none; }
+  .visionneuse img { max-width: min(100%, 900px); max-height: calc(100vh - 90px); object-fit: contain; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, .6); }
+  .visionneuse .barre-v { display: flex; align-items: center; gap: 12px; color: #fff; font-weight: 700; }
+  .visionneuse button { background: var(--fond3); color: #fff; border: 1px solid var(--bord); border-radius: 8px; padding: 8px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+  .visionneuse .fermer { position: absolute; top: 12px; right: 14px; }
+
+  /* Progression vers le prochain badge (page d'un dresseur) */
+  .elo-carte { margin: 6px 0 2px; padding: 10px 12px; border-radius: 10px; background: var(--fond2); border: 1px solid var(--bord); font-size: 14px; }
+  .elo-carte .barre { margin-top: 6px; }
+  .elo-carte small { color: var(--gris); }
+
   /* Dernières captures */
   .defile { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
   .mini { flex: none; width: 108px; text-align: center; background: var(--fond2); border: 1px solid var(--bord);
@@ -428,16 +453,26 @@
   </div>
 </header>
 
+<div class="visionneuse cache" id="visionneuse" role="dialog" aria-modal="true" aria-label="Guide">
+  <button type="button" class="fermer" id="vFermer">✕ Fermer</button>
+  <img id="vImg" alt="">
+  <div class="barre-v"><button type="button" id="vPrec">◀</button><span id="vTitre"></span><button type="button" id="vSuiv">▶</button></div>
+</div>
+
 <main class="conteneur">
   <div id="etat" class="etat">Chargement du Dex…</div>
 
   <!-- Accueil -->
   <div id="accueil" class="cache">
     <section class="lore" id="lore"></section>
+    <section class="carte cache" id="blocGuides">
+      <div class="tete"><span class="pastille">📚 Guide pour débuter</span><b>Apprendre à jouer</b><span class="tete-droite">clique sur un guide</span></div>
+      <div class="corps"><div class="guides" id="guides"></div></div>
+    </section>
     <section id="blocChampion"></section>
     <section class="carte">
       <div class="tete"><span class="pastille">🏆 Classement</span><b>Arène des Nutons</b></div>
-      <div class="corps"><div id="classement" class="classement"></div></div>
+      <div class="corps"><div id="classement" class="classement"></div><button type="button" class="voir-tout cache" id="voirClassement"></button></div>
     </section>
     <section class="carte">
       <div class="tete"><span class="pastille">🎉 Captures</span><b>Les dernières prises du live</b></div>
@@ -964,6 +999,51 @@ function afficherEncyclo(d) {
       : '<div class="vide">Personne n\'a encore découvert d\'espèce.</div>'}</ol></div></div>`;
 }
 
+// ---------- Classement de l'Arène et badges ----------
+let classementOuvert = false;
+function classesArene() {
+  return donnees.dresseurs.filter(x => x.victoires + x.defaites > 0).sort((a, b) => b.elo - a.elo || b.victoires - a.victoires);
+}
+function eloCarte(x) {
+  const classes = classesArene(), place = classes.findIndex(y => cleNom(y.nom) === cleNom(x.nom)) + 1;
+  const rangs = donnees.rangs || [];
+  const actuel = [...rangs].reverse().find(r => x.elo >= r[0]) || [0, x.rang], suivant = rangs.find(r => r[0] > x.elo);
+  const pct = suivant ? Math.round(100 * (x.elo - actuel[0]) / (suivant[0] - actuel[0])) : 100;
+  return `<div class="elo-carte">🏅 <b>${x.elo} points</b> · ${badge(x.rang)}` +
+    (place ? ` · <b>${place}<sup>${place === 1 ? 'er' : 'e'}</sup></b> sur ${classes.length} au classement` : ' · pas encore classé (fais un combat !)') +
+    (suivant ? `<div class="barre"><div style="width:${pct}%"></div></div><small>Prochain badge : ${badge(suivant[1])} à ${suivant[0]} points (encore ${suivant[0] - x.elo})` +
+      ` · battre un dresseur mieux classé rapporte un bonus !</small>` : '<small>Le plus haut badge : bravo !</small>') + '</div>';
+}
+
+// ---------- Guide pour débuter : les images des guides, en grand au clic ----------
+let guideOuvert = -1;
+function afficherGuides(d) {
+  const g = d.guides || [];
+  $('blocGuides').classList.toggle('cache', !g.length);
+  $('guides').innerHTML = g.map((x, i) => `<button type="button" class="guide" data-i="${i}"><img src="${esc(x.fichier)}" alt="" loading="lazy">` +
+    `<b>${esc(x.icone || '')} ${esc(x.titre)}</b></button>`).join('');
+  $('guides').querySelectorAll('.guide').forEach(b => b.onclick = () => ouvrirGuide(+b.dataset.i));
+}
+function ouvrirGuide(i) {
+  const g = donnees.guides || [];
+  if (!g.length) return;
+  guideOuvert = (i + g.length) % g.length;
+  $('vImg').src = g[guideOuvert].fichier; $('vImg').alt = g[guideOuvert].titre;
+  $('vTitre').textContent = `${g[guideOuvert].icone || ''} ${g[guideOuvert].titre} · ${guideOuvert + 1}/${g.length}`;
+  $('visionneuse').classList.remove('cache');
+}
+function fermerGuide() { $('visionneuse').classList.add('cache'); guideOuvert = -1; }
+$('vFermer').onclick = fermerGuide;
+$('vPrec').onclick = () => ouvrirGuide(guideOuvert - 1);
+$('vSuiv').onclick = () => ouvrirGuide(guideOuvert + 1);
+$('visionneuse').onclick = e => { if (e.target.id === 'visionneuse') fermerGuide(); };
+document.addEventListener('keydown', e => {
+  if (guideOuvert < 0) return;
+  if (e.key === 'Escape') fermerGuide();
+  else if (e.key === 'ArrowLeft') ouvrirGuide(guideOuvert - 1);
+  else if (e.key === 'ArrowRight') ouvrirGuide(guideOuvert + 1);
+});
+
 // ---------- Accueil ----------
 function afficherAccueil() {
   const d = donnees;
@@ -974,8 +1054,13 @@ function afficherAccueil() {
     : '';
   $('blocChampion').classList.toggle('cache', !d.champion);
 
-  const top = d.dresseurs.filter(x => x.victoires + x.defaites > 0)
-    .sort((a, b) => b.elo - a.elo || b.victoires - a.victoires).slice(0, 10);
+  const classes = classesArene();
+  const top = classementOuvert ? classes : classes.slice(0, 10);
+  const vt = $('voirClassement');
+  vt.classList.toggle('cache', classes.length <= 10);
+  vt.textContent = classementOuvert ? '▲ Réduire au top 10' : `▼ Voir tout le classement (${classes.length} dresseurs)`;
+  vt.onclick = () => { classementOuvert = !classementOuvert; afficherAccueil(); };
+  afficherGuides(d);
   $('classement').innerHTML = top.length ? top.map((x, i) =>
     `<a class="ligne" href="#${encodeURIComponent(x.nom)}"><span class="pos">${i + 1}</span>` +
     `<span>${x.champion ? '👑 ' : ''}<b>${esc(x.nom)}</b><small>${badge(x.rang)}</small></span>` +
@@ -1023,7 +1108,7 @@ function afficherDex(nom) {
   const variantes = x.pokemons.filter(p => p.type !== 'normal').length;
   $('titreDex').innerHTML = `${esc(x.nom)}<span>Dex</span>`;
   $('statsDex').innerHTML =
-    `<div>💰 ${x.pieces} liards</div><div>${badge(x.rang)}</div>` +
+    `<div>💰 ${x.pieces} liards</div><div>${badge(x.rang)} · ${x.elo} pts</div>` +
     `<div>⚔️ ${x.victoires}V / ${x.defaites}D</div>` +
     (x.meilleure_serie > 1 ? `<div>🔥 Meilleure série : ${x.meilleure_serie}</div>` : '') +
     (variantes ? `<div>✨ ${variantes} variante${variantes > 1 ? 's' : ''}</div>` : '') +
@@ -1032,7 +1117,7 @@ function afficherDex(nom) {
     (((donnees.marche || {}).joueurs || {})[cleNom(x.nom)] ? `<div>🚂 ${donnees.marche.artefacts.filter(a => donnees.marche.joueurs[cleNom(x.nom)].objets[a.cle]).length}/10 artefacts</div>` : '') +
     (donnees.succes ? `<div><a href="javascript:void 0" id="versSucces" style="text-decoration:none">🏆 Succès et effets ↓</a></div>` : '');
   const pct = Math.min(100, 100 * especes / (donnees.pokedex_max || 99));
-  $('progression').innerHTML = `<div class="barre"><div style="width:${pct}%"></div></div>` +
+  $('progression').innerHTML = eloCarte(x) + `<div class="barre"><div style="width:${pct}%"></div></div>` +
     `<small>${x.pokemons.length} Nuton${x.pokemons.length > 1 ? 's' : ''} · ${especes} espèce${especes > 1 ? 's' : ''} sur ${donnees.pokedex_max || 99}</small>`;
   $('outils').classList.toggle('cache', !x.pokemons.length);
   $('partager').classList.remove('cache');
