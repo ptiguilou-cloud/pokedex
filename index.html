@@ -91,7 +91,9 @@
   .voir-tout:hover { background: var(--fond2); }
   .ligne.moi { border-color: var(--jaune); }
 
-  /* Guide pour débuter */
+  /* Guide pour débuter : un menu qu'on déroule (fermé par défaut, la page s'en souvient) */
+  .tete-repli { width: 100%; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .tete-repli:hover .tete-droite { color: var(--violet-clair); }
   .guides { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
   .guide { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 10px; background: var(--fond2); border: 1px solid var(--bord);
     cursor: pointer; text-align: left; color: inherit; font: inherit; transition: transform .15s, border-color .15s; }
@@ -466,8 +468,9 @@
   <div id="accueil" class="cache">
     <section class="lore" id="lore"></section>
     <section class="carte cache" id="blocGuides">
-      <div class="tete"><span class="pastille">📚 Guide pour débuter</span><b>Apprendre à jouer</b><span class="tete-droite">clique sur un guide</span></div>
-      <div class="corps"><div class="guides" id="guides"></div></div>
+      <button type="button" class="tete tete-repli" id="ouvrirGuides" aria-expanded="false" aria-controls="corpsGuides">
+        <span class="pastille">📚 Guide pour débuter</span><b>Apprendre à jouer</b><span class="tete-droite" id="texteGuides">Clique pour afficher les guides ▾</span></button>
+      <div class="corps cache" id="corpsGuides"><div class="guides" id="guides"></div></div>
     </section>
     <section id="blocChampion"></section>
     <section class="carte">
@@ -1017,9 +1020,22 @@ function eloCarte(x) {
 
 // ---------- Guide pour débuter : les images des guides, en grand au clic ----------
 let guideOuvert = -1;
+let guidesOuverts = false;
+try { guidesOuverts = localStorage.getItem('nutons_guides') === '1'; } catch (e) { }
+function replierGuides() {
+  $('corpsGuides').classList.toggle('cache', !guidesOuverts);
+  $('ouvrirGuides').setAttribute('aria-expanded', String(guidesOuverts));
+  $('texteGuides').textContent = guidesOuverts ? 'Masquer les guides ▴' : 'Clique pour afficher les guides ▾';
+}
+$('ouvrirGuides').onclick = () => {
+  guidesOuverts = !guidesOuverts;
+  try { localStorage.setItem('nutons_guides', guidesOuverts ? '1' : '0'); } catch (e) { }
+  replierGuides();
+};
 function afficherGuides(d) {
   const g = d.guides || [];
   $('blocGuides').classList.toggle('cache', !g.length);
+  replierGuides();
   $('guides').innerHTML = g.map((x, i) => `<button type="button" class="guide" data-i="${i}"><img src="${esc(x.fichier)}" alt="" loading="lazy">` +
     `<b>${esc(x.icone || '')} ${esc(x.titre)}</b></button>`).join('');
   $('guides').querySelectorAll('.guide').forEach(b => b.onclick = () => ouvrirGuide(+b.dataset.i));
