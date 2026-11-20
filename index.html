@@ -407,6 +407,7 @@
     box-shadow: 0 0 10px var(--fx); opacity: 0; animation: fxSpirale 2.2s ease-out forwards; }
   .fx-glyphe { bottom: 20%; font-size: 28px; font-weight: 900; color: var(--fx); text-shadow: 0 0 8px var(--fx), 0 2px 2px #000;
     opacity: 0; animation: fxMonte 1.9s ease-out forwards; }
+  .fx-luciole { text-shadow: 0 0 6px var(--fx), 0 0 12px var(--fx); }
   .fx-rayons { inset: 0; border-radius: 50%; opacity: 0;
     background: repeating-conic-gradient(var(--fx) 0 9deg, transparent 9deg 30deg);
     -webkit-mask: radial-gradient(circle, transparent 28%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 28%, #000 32%, transparent 70%);
@@ -834,7 +835,7 @@ document.querySelectorAll('.onglet').forEach(b => b.onclick = () => { onglet = b
 
 // ---------- Succès et effets ----------
 const ICONES_FX = { eclairs: '⚡', aura: '◎', feuilles: '🍃', confettis: '🎊', flammes: '🔥', bulles: '💧', spirale: '🌀',
-                    onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★', brume: '🌫️' };
+                    onde: '〰️', notes: '♪', coeurs: '♥', rayons: '☀️', etoile: '★', brume: '🌫️', lucioles: '✦', couronnes: '♛' };
 const CHIFFRES = ['', 'I', 'II', 'III'];
 const COUL_RANG = ['', '#d89a64', '#dfe4ec', '#ffcb05'];
 const majuscule = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -880,6 +881,8 @@ function lancerFx(zone, type, coul) {
     case 'spirale': P('fx-point', 12, (s, i) => { s.style.setProperty('--a', i * 30 + 'deg'); s.style.animationDelay = i * .07 + 's'; }); break;
     case 'notes': P('fx-glyphe', 12, (s, i) => { s.textContent = i % 2 ? '♪' : '♫'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
     case 'coeurs': P('fx-glyphe', 12, s => { s.textContent = '♥'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
+    case 'lucioles': P('fx-glyphe fx-luciole', 16, s => { s.textContent = '✦'; s.style.left = H(0, 88) + '%'; s.style.animationDelay = H(0, 1.8) + 's'; s.style.fontSize = H(10, 20) + 'px'; }); break;
+    case 'couronnes': P('fx-glyphe', 10, s => { s.textContent = '♛'; s.style.left = H(0, 85) + '%'; s.style.animationDelay = H(0, 1.6) + 's'; }); break;
     case 'rayons': P('fx-rayons', 1, () => {}); break;
     case 'etoile': P('fx-grande-etoile', 1, s => s.textContent = '★');
       P('fx-etincelle', 18, s => { s.textContent = '✦'; eclat(s, 60, 130); s.style.animationDelay = H(.4, 1.2) + 's'; }); break;
